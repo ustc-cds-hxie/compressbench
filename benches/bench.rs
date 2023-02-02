@@ -1,19 +1,29 @@
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, black_box, criterion_group, criterion_main, PlotConfiguration, AxisScale, Throughput, BenchmarkId};
 use std::io::{Cursor, Read, Write};
 
 fn compare_compress(c: &mut Criterion) {
-    let mut group = c.benchmark_group("compression");
-	// read into memory first
+	// two benchmark groups
+    let mut group_compress = c.benchmark_group("compression");
+
+	// plot config
+	let plot_config_compress = PlotConfiguration::default().summary_scale(AxisScale::Logarithmic);
+
+    group_compress.plot_config(plot_config_compress);
+
+	// prepare raw data, load into memory
 	let uncompressed = std::fs::read(
 		std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS")
 	).expect("reading $FILE_TO_COMPRESS");
 	let orig_len = uncompressed.len();
 	
+	// prepare data structures for benchmark
 	println!("uncompressed: {} bytes", orig_len);
 	let mut compressed = Vec::with_capacity(orig_len);
 	let mut unpacked = Vec::with_capacity(orig_len);
+
 	// various LZ4 implementtions
-    group.bench_function("lz4-compression.pack", |b| {
+	group_compress.throughput(Throughput::Elements(orig_len as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "lz4"), |b| {
 		let orig = &uncompressed;
         b.iter(|| {
             black_box(&mut compressed).clear();
@@ -21,13 +31,15 @@ fn compare_compress(c: &mut Criterion) {
         })
     });
     println!("lz4-compression: {} bytes", compressed.len());
-    group.bench_function("lz4-compression.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lz4"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             lz4_compression::decompress::decompress_into(black_box(&compressed), black_box(&mut unpacked))
         })
     });
-    group.bench_function("lz4_flex.pack", |b| {
+	group_compress.throughput(Throughput::Elements(orig_len as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "lz4_flex"), |b| {
 		let orig = &uncompressed;
         b.iter(|| {
             black_box(&mut compressed).clear();
@@ -35,13 +47,15 @@ fn compare_compress(c: &mut Criterion) {
         })
     });
     println!("lz4_flex: {} bytes", compressed.len());
-    group.bench_function("lz4_flex.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lz4_flex"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             lz4_flex::decompress_into(black_box(&compressed), black_box(&mut unpacked))
         })
     });
-    group.bench_function("lz_fear.pack", |b| {
+	group_compress.throughput(Throughput::Elements(orig_len as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "lz4_fear"), |b| {
 		let lzfear = lz_fear::CompressionSettings::default();
 		let orig = &uncompressed[..];
         b.iter(|| {
@@ -50,16 +64,19 @@ fn compare_compress(c: &mut Criterion) {
         })
     });
     println!("lz_fear: {} bytes", compressed.len());
-    group.bench_function("lz_fear.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lz4_fear"), |b| {
         b.iter(|| {
             let mut lzfear = lz_fear::LZ4FrameReader::new(black_box(&compressed[..])).unwrap().into_read();
             black_box(&mut unpacked).clear();
             lzfear.read_to_end(black_box(&mut unpacked))
         })
     });
+
     {
 		use lzzzz::lz4::{compress_to_vec, decompress, ACC_LEVEL_DEFAULT};
-		group.bench_function("lzzzz.pack", |b| {
+		group_compress.throughput(Throughput::Elements(orig_len as u64));
+		group_compress.bench_function(BenchmarkId::new("pack", "lzzzz"), |b| {
 			let orig = &uncompressed[..];
 			b.iter(|| {
 				black_box(&mut compressed).clear();
@@ -67,7 +84,8 @@ fn compare_compress(c: &mut Criterion) {
 			})
 		});
 		println!("lzzzz: {} bytes", compressed.len());
-		group.bench_function("lzzzz.unpack", |b| {
+		group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+		group_compress.bench_function(BenchmarkId::new("unpack", "lzzzz"), |b| {
 			b.iter(|| {
 				black_box(&mut unpacked).clear();
 				decompress(black_box(&compressed), black_box(&mut unpacked))
@@ -80,7 +98,9 @@ fn compare_compress(c: &mut Criterion) {
 		compressed.clear();
 		compressed.resize(orig_len * 2, 0_u8);
 		let comp_len = zstd::block::compress_to_buffer(orig, &mut compressed, level).unwrap();
-		group.bench_function(&format!("zstd-level-{}.pack", level), |b| {
+
+		group_compress.throughput(Throughput::Elements(orig_len as u64));
+		group_compress.bench_function(BenchmarkId::new("pack", format!("zstd {:?}", level)), |b| {
 			b.iter(|| {
 				zstd::block::compress_to_buffer(black_box(orig), black_box(&mut compressed), black_box(level))
 			})
@@ -89,7 +109,8 @@ fn compare_compress(c: &mut Criterion) {
 		unpacked.clear();
 		unpacked.resize(orig_len, 0_u8);
 		let comp = &compressed[..comp_len];
-		group.bench_function(&format!("zstd-level-{}.unpack", level), |b| {
+		group_compress.throughput(Throughput::Elements(comp.len() as u64));
+		group_compress.bench_function(BenchmarkId::new("unpack", format!("zstd {:?}", level)), |b| {
 			b.iter(|| {
 				black_box(&mut unpacked).clear();
 				zstd::block::decompress_to_buffer(black_box(comp), black_box(&mut unpacked))
@@ -98,7 +119,8 @@ fn compare_compress(c: &mut Criterion) {
 	}
 	// snappy
 	let orig = &uncompressed;
-	group.bench_function("snap.pack", |b| {
+	group_compress.throughput(Throughput::Elements(orig_len as u64));
+	group_compress.bench_function(BenchmarkId::new("pack", "snap"), |b| {
 		compressed.clear();
 		compressed.resize(orig_len * 2, 0_u8);
         b.iter(|| {
@@ -107,7 +129,9 @@ fn compare_compress(c: &mut Criterion) {
     });
     let comp_len = snap::raw::Encoder::new().compress(orig, &mut compressed).unwrap();
     println!("snap: {} bytes", comp_len);
-    group.bench_function("snap.unpack", |b| {
+
+	group_compress.throughput(Throughput::Elements(comp_len as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "snap"), |b| {
 		unpacked.clear();
 		unpacked.resize(orig_len, 0_u8);
 		let comp = &compressed[..comp_len];
@@ -115,7 +139,8 @@ fn compare_compress(c: &mut Criterion) {
             snap::raw::Decoder::new().decompress(black_box(comp), black_box(&mut unpacked))
         })
     });
-    group.bench_function("snappy-framed.pack", |b| {
+	/*
+    group_compress.bench_function("snappy-framed.pack", |b| {
         b.iter(|| {
 			black_box(&mut compressed).clear();
 			let mut enc = snappy_framed::write::SnappyFramedEncoder::new(black_box(&mut compressed)).unwrap();
@@ -124,7 +149,7 @@ fn compare_compress(c: &mut Criterion) {
         })
     });
     println!("snappy-framed: {} bytes", compressed.len());
-    group.bench_function("snappy-framed.unpack.nocrc", |b| {
+    group_compress.bench_function("snappy-framed.unpack.nocrc", |b| {
         b.iter(|| {
 			black_box(&mut unpacked).clear();
 			let mut cursor = Cursor::new(black_box(&compressed));
@@ -132,7 +157,7 @@ fn compare_compress(c: &mut Criterion) {
 			decoder.read_to_end(black_box(&mut unpacked))
         })
     });
-    group.bench_function("snappy-framed.unpack.crc", |b| {
+    group_compress.bench_function("snappy-framed.unpack.crc", |b| {
         b.iter(|| {
 			black_box(&mut unpacked).clear();
 			let mut cursor = Cursor::new(&compressed);
@@ -140,10 +165,12 @@ fn compare_compress(c: &mut Criterion) {
             decoder.read_to_end(black_box(&mut unpacked))
         })
     });
+	*/
     // deflate
     use deflate::Compression;
     for &level in &[Compression::Fast, Compression::Default, Compression::Best] {
-		group.bench_function(&format!("deflate-{:?}.pack", level), |b| {
+		group_compress.throughput(Throughput::Elements(orig_len as u64));
+		group_compress.bench_function(BenchmarkId::new("pack", format!("deflate {:?}", level)), |b| {
 			let orig = &uncompressed;
 			b.iter(|| {
 				black_box(&mut compressed).clear();
@@ -153,14 +180,16 @@ fn compare_compress(c: &mut Criterion) {
 			})
 		});
 		println!("deflate-{:?}: {} bytes", level, compressed.len());
-		group.bench_function(&format!("deflate-{:?}.unpack", level), |b| {
+		group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+		group_compress.bench_function(BenchmarkId::new("unpack", format!("deflate {:?}", level)), |b| {
 			b.iter(|| {
 				deflate::deflate_bytes(black_box(&compressed))
 			})
 		});
 	}
 	for level in flate2::Compression::fast().level() .. flate2::Compression::best().level() {
-		group.bench_function(&format!("flate2-{}.pack", level), |b| {
+		group_compress.throughput(Throughput::Elements(orig_len as u64));
+		group_compress.bench_function(BenchmarkId::new("pack", format!("flate2 {:?}", level)), |b| {
 			compressed.clear();
 			compressed.resize(orig_len * 2, 0_u8);
 			b.iter(|| {
@@ -178,7 +207,8 @@ fn compare_compress(c: &mut Criterion) {
 			flate2::FlushCompress::Finish
 		).unwrap();
 		println!("flate2-{}: {} bytes", level, comp.total_out());
-		group.bench_function(&format!("flate2-{}.unpack", level), |b| {
+		group_compress.throughput(Throughput::Elements(comp_len as u64));
+		group_compress.bench_function(BenchmarkId::new("unpack", format!("flate2 {:?}", level)), |b| {
 			unpacked.clear();
 			unpacked.resize(orig_len, 0_u8);
 			let comp = &compressed[..comp_len];
@@ -193,7 +223,8 @@ fn compare_compress(c: &mut Criterion) {
 	}
 	use yazi::CompressionLevel;
 	for &level in &[CompressionLevel::BestSpeed, CompressionLevel::Default, CompressionLevel::BestSize] {
-		group.bench_function(&format!("yazi-{:?}.pack", level), |b| {
+		group_compress.throughput(Throughput::Elements(orig_len as u64));
+		group_compress.bench_function(BenchmarkId::new("pack", format!("yazi {:?}", level)), |b| {
 			let orig = &uncompressed[..];
 			b.iter(|| {
 				black_box(&mut compressed).clear();
@@ -206,7 +237,8 @@ fn compare_compress(c: &mut Criterion) {
 			})
 		});
 		println!("yazi-{:?}: {} bytes", level, compressed.len());
-		group.bench_function(&format!("yazi-{:?}.unpack", level), |b| {
+		group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+		group_compress.bench_function(BenchmarkId::new("unpack", format!("yazi {:?}", level)), |b| {
 			b.iter(|| {
 				black_box(&mut unpacked).clear();
 				let mut decoder = yazi::Decoder::new();
@@ -218,47 +250,57 @@ fn compare_compress(c: &mut Criterion) {
 		});
 	}
 	// LZMA
-	group.bench_function("lzma-rs.pack", |b| {
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+	group_compress.bench_function(BenchmarkId::new("pack", "lzma"), |b| {
         b.iter(|| {
             black_box(&mut compressed).clear();
             lzma_rs::lzma_compress(black_box(&mut &uncompressed[..]), black_box(&mut compressed))
         })
     });
     println!("lzma-rs: {} bytes", compressed.len());
-    group.bench_function("lzma-rs.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lzma"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             lzma_rs::lzma_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked))
         })
     });
-    group.bench_function("lzma-rs/2.pack", |b| {
+
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "lzma2"), |b| {
         b.iter(|| {
             black_box(&mut compressed).clear();
             lzma_rs::lzma2_compress(black_box(&mut &uncompressed[..]), black_box(&mut compressed))
         })
     });
     println!("lzma-rs/2: {} bytes", compressed.len());
-    group.bench_function("lzma-rs/2.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lzma2"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             lzma_rs::lzma2_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked))
         })
     });
-    group.bench_function("lzma-rs/xz.pack", |b| {
+
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "lzma_xz"), |b| {
         b.iter(|| {
             black_box(&mut compressed).clear();
             lzma_rs::xz_compress(black_box(&mut &uncompressed[..]), black_box(&mut compressed))
         })
     });
     println!("lzma-rs/xz: {} bytes", compressed.len());
-    group.bench_function("lzma-rs/xz.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "lzma_xz"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             lzma_rs::xz_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked))
         })
     });
+
     // Zopfli
-	group.bench_function("zopfli.pack", |b| {
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+	group_compress.bench_function(BenchmarkId::new("pack", "zopfli"), |b| {
         b.iter(|| {
             black_box(&mut compressed).clear();
             zopfli::compress(
@@ -271,8 +313,10 @@ fn compare_compress(c: &mut Criterion) {
     });
     println!("zopfli: {} bytes", compressed.len());
     // no decompression here
+
     // Brotli
-    group.bench_function("brotli.pack", |b| {
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "brotli"), |b| {
         b.iter(|| {
             black_box(&mut compressed).clear();
             brotli::BrotliCompress(
@@ -283,14 +327,17 @@ fn compare_compress(c: &mut Criterion) {
         })
     });
     println!("brotli: {} bytes", compressed.len());
-    group.bench_function("brotli.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(compressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("unpack", "brotli"), |b| {
         b.iter(|| {
             black_box(&mut unpacked).clear();
             brotli::BrotliDecompress(black_box(&mut &compressed[..]), black_box(&mut unpacked))
         })
     });
+
     // tar
-    group.bench_function("tar.pack", |b| {
+	group_compress.throughput(Throughput::Elements(uncompressed.len() as u64));
+    group_compress.bench_function(BenchmarkId::new("pack", "tar"), |b| {
 		compressed.reserve(uncompressed.len()); // double the excitement! ;P
         b.iter(|| {
 			black_box(&mut compressed).clear();
@@ -310,8 +357,10 @@ fn compare_compress(c: &mut Criterion) {
 	println!("tar: {} bytes", compressed.len());
 	// unfortunately, tar only unpacks to disk, so this result would be
 	// incomparable. Perhaps in a later benchmark.
+
     // zip
-	group.bench_function("zip.pack", |b| {
+	group_compress.throughput(Throughput::Elements(orig_len as u64));
+	group_compress.bench_function(BenchmarkId::new("pack", "zip"), |b| {
 		compressed.clear();
 		compressed.resize(orig_len * 2, 0_u8);
         b.iter(|| {
@@ -329,14 +378,17 @@ fn compare_compress(c: &mut Criterion) {
 		c.position() as usize
 	};
 	println!("zip: {} bytes", ziplen);
-	group.bench_function("zip.unpack", |b| {
+	group_compress.throughput(Throughput::Elements(ziplen as u64));
+	group_compress.bench_function(BenchmarkId::new("unpack", "zip"), |b| {
 		b.iter(|| {
 			black_box(&mut unpacked).clear();
 			let mut zipr = zip::ZipArchive::new(Cursor::new(black_box(&compressed[..ziplen]))).unwrap();
 			zipr.by_index(0).unwrap().read_to_end(black_box(&mut unpacked)).unwrap();
 		})
 	});
-    group.finish();
+
+    group_compress.finish();
+	
 }
 
 criterion_group!(
