@@ -1,0 +1,902 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+uncompressed: 3207246 bytes
+Benchmarking compression/pack/lz4
+Benchmarking compression/pack/lz4: Warming up for 3.0000 s
+Benchmarking compression/pack/lz4: Collecting 10 samples in estimated 5.3925 s (660 iterations)
+Benchmarking compression/pack/lz4: Analyzing
+compression/pack/lz4    time:   [8.0972 ms 8.1636 ms 8.2608 ms]
+                        thrpt:  [388.25 Melem/s 392.87 Melem/s 396.09 Melem/s]
+                 change:
+                        time:   [-64.737% -64.165% -63.383%] (p = 0.00 < 0.05)
+                        thrpt:  [+173.10% +179.06% +183.58%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+lz4-compression: 1041702 bytes
+Benchmarking compression/unpack/lz4
+Benchmarking compression/unpack/lz4: Warming up for 3.0000 s
+Benchmarking compression/unpack/lz4: Collecting 10 samples in estimated 5.0092 s (990 iterations)
+Benchmarking compression/unpack/lz4: Analyzing
+compression/unpack/lz4  time:   [5.0734 ms 5.1129 ms 5.1532 ms]
+                        thrpt:  [202.15 Melem/s 203.74 Melem/s 205.33 Melem/s]
+                 change:
+                        time:   [+433.34% +445.85% +457.84%] (p = 0.00 < 0.05)
+                        thrpt:  [-82.074% -81.680% -81.250%]
+                        Performance has regressed.
+Benchmarking compression/pack/lz4_flex
+Benchmarking compression/pack/lz4_flex: Warming up for 3.0000 s
+Benchmarking compression/pack/lz4_flex: Collecting 10 samples in estimated 5.1811 s (1100 iterations)
+Benchmarking compression/pack/lz4_flex: Analyzing
+compression/pack/lz4_flex
+                        time:   [4.7172 ms 4.7521 ms 4.8002 ms]
+                        thrpt:  [668.15 Melem/s 674.92 Melem/s 679.90 Melem/s]
+                 change:
+                        time:   [+249.49% +260.50% +272.41%] (p = 0.00 < 0.05)
+                        thrpt:  [-73.148% -72.260% -71.387%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+lz4_flex: 999937 bytes
+Benchmarking compression/unpack/lz4_flex
+Benchmarking compression/unpack/lz4_flex: Warming up for 3.0000 s
+Benchmarking compression/unpack/lz4_flex: Collecting 10 samples in estimated 5.0000 s (1.6B iterations)
+Benchmarking compression/unpack/lz4_flex: Analyzing
+compression/unpack/lz4_flex
+                        time:   [3.1657 ns 3.1727 ns 3.1857 ns]
+                        thrpt:  [313887 Gelem/s 315171 Gelem/s 315865 Gelem/s]
+                 change:
+                        time:   [-99.982% -99.982% -99.982%] (p = 0.00 < 0.05)
+                        thrpt:  [+548535% +555525% +561952%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/lz4_fear
+Benchmarking compression/pack/lz4_fear: Warming up for 3.0000 s
+Benchmarking compression/pack/lz4_fear: Collecting 10 samples in estimated 5.3501 s (770 iterations)
+Benchmarking compression/pack/lz4_fear: Analyzing
+compression/pack/lz4_fear
+                        time:   [6.8671 ms 6.8889 ms 6.9118 ms]
+                        thrpt:  [464.03 Melem/s 465.57 Melem/s 467.05 Melem/s]
+                 change:
+                        time:   [+46.983% +49.733% +53.909%] (p = 0.00 < 0.05)
+                        thrpt:  [-35.026% -33.214% -31.965%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+lz_fear: 926506 bytes
+Benchmarking compression/unpack/lz4_fear
+Benchmarking compression/unpack/lz4_fear: Warming up for 3.0000 s
+Benchmarking compression/unpack/lz4_fear: Collecting 10 samples in estimated 5.0480 s (1375 iterations)
+Benchmarking compression/unpack/lz4_fear: Analyzing
+compression/unpack/lz4_fear
+                        time:   [3.5572 ms 3.6166 ms 3.7602 ms]
+                        thrpt:  [246.40 Melem/s 256.18 Melem/s 260.46 Melem/s]
+                 change:
+                        time:   [-61.269% -58.020% -54.529%] (p = 0.00 < 0.05)
+                        thrpt:  [+119.92% +138.21% +158.19%]
+                        Performance has improved.
+Benchmarking compression/pack/lzzzz
+Benchmarking compression/pack/lzzzz: Warming up for 3.0000 s
+Benchmarking compression/pack/lzzzz: Collecting 10 samples in estimated 5.0863 s (1650 iterations)
+Benchmarking compression/pack/lzzzz: Analyzing
+compression/pack/lzzzz  time:   [3.0797 ms 3.1065 ms 3.1377 ms]
+                        thrpt:  [1.0222 Gelem/s 1.0324 Gelem/s 1.0414 Gelem/s]
+                 change:
+                        time:   [+89.577% +104.43% +119.20%] (p = 0.00 < 0.05)
+                        thrpt:  [-54.379% -51.084% -47.251%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+lzzzz: 926487 bytes
+Benchmarking compression/unpack/lzzzz
+Benchmarking compression/unpack/lzzzz: Warming up for 3.0000 s
+Benchmarking compression/unpack/lzzzz: Collecting 10 samples in estimated 5.0000 s (983M iterations)
+Benchmarking compression/unpack/lzzzz: Analyzing
+compression/unpack/lzzzz
+                        time:   [5.0730 ns 5.1072 ns 5.1737 ns]
+                        thrpt:  [179075 Gelem/s 181408 Gelem/s 182631 Gelem/s]
+                 change:
+                        time:   [-0.0015% +0.7264% +1.5204%] (p = 0.10 > 0.05)
+                        thrpt:  [-1.4977% -0.7212% +0.0015%]
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking compression/pack/zstd_1
+Benchmarking compression/pack/zstd_1: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_1: Collecting 10 samples in estimated 5.2625 s (1100 iterations)
+Benchmarking compression/pack/zstd_1: Analyzing
+compression/pack/zstd_1 time:   [4.7919 ms 4.8337 ms 4.9200 ms]
+                        thrpt:  [651.88 Melem/s 663.52 Melem/s 669.31 Melem/s]
+                 change:
+                        time:   [-13.178% -8.6450% -3.3263%] (p = 0.01 < 0.05)
+                        thrpt:  [+3.4408% +9.4631% +15.179%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+zstd_1: 502723 bytes
+Benchmarking compression/unpack/zstd_1
+Benchmarking compression/unpack/zstd_1: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_1: Collecting 10 samples in estimated 5.0021 s (102k iterations)
+Benchmarking compression/unpack/zstd_1: Analyzing
+compression/unpack/zstd_1
+                        time:   [48.112 us 48.236 us 48.540 us]
+                        thrpt:  [10.357 Gelem/s 10.422 Gelem/s 10.449 Gelem/s]
+                 change:
+                        time:   [+22478% +22763% +23074%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.568% -99.563% -99.557%]
+                        Performance has regressed.
+Benchmarking compression/pack/zstd_2
+Benchmarking compression/pack/zstd_2: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_2: Collecting 10 samples in estimated 5.2077 s (990 iterations)
+Benchmarking compression/pack/zstd_2: Analyzing
+compression/pack/zstd_2 time:   [5.1677 ms 5.1776 ms 5.1946 ms]
+                        thrpt:  [617.42 Melem/s 619.44 Melem/s 620.63 Melem/s]
+                 change:
+                        time:   [-6.5464% -3.7516% +1.3114%] (p = 0.10 > 0.05)
+                        thrpt:  [-1.2945% +3.8978% +7.0050%]
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+zstd_2: 493719 bytes
+Benchmarking compression/unpack/zstd_2
+Benchmarking compression/unpack/zstd_2: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_2: Collecting 10 samples in estimated 5.0025 s (99k iterations)
+Benchmarking compression/unpack/zstd_2: Analyzing
+compression/unpack/zstd_2
+                        time:   [50.875 us 51.182 us 51.488 us]
+                        thrpt:  [9.5891 Gelem/s 9.6464 Gelem/s 9.7045 Gelem/s]
+                 change:
+                        time:   [+23626% +24094% +24781%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.598% -99.587% -99.579%]
+                        Performance has regressed.
+Found 4 outliers among 10 measurements (40.00%)
+  2 (20.00%) low mild
+  2 (20.00%) high severe
+Benchmarking compression/pack/zstd_3
+Benchmarking compression/pack/zstd_3: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_3: Collecting 10 samples in estimated 5.0849 s (770 iterations)
+Benchmarking compression/pack/zstd_3: Analyzing
+compression/pack/zstd_3 time:   [6.5822 ms 6.9335 ms 7.1861 ms]
+                        thrpt:  [446.31 Melem/s 462.57 Melem/s 487.26 Melem/s]
+                 change:
+                        time:   [+3.9579% +8.3651% +13.041%] (p = 0.00 < 0.05)
+                        thrpt:  [-11.536% -7.7193% -3.8072%]
+                        Performance has regressed.
+zstd_3: 483315 bytes
+Benchmarking compression/unpack/zstd_3
+Benchmarking compression/unpack/zstd_3: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_3: Collecting 10 samples in estimated 5.0006 s (101k iterations)
+Benchmarking compression/unpack/zstd_3: Analyzing
+compression/unpack/zstd_3
+                        time:   [49.316 us 49.823 us 50.702 us]
+                        thrpt:  [9.5324 Gelem/s 9.7005 Gelem/s 9.8004 Gelem/s]
+                 change:
+                        time:   [+23239% +23681% +24393%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.592% -99.580% -99.572%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high severe
+Benchmarking compression/pack/zstd_4
+Benchmarking compression/pack/zstd_4: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_4: Collecting 10 samples in estimated 5.2702 s (770 iterations)
+Benchmarking compression/pack/zstd_4: Analyzing
+compression/pack/zstd_4 time:   [6.7821 ms 6.9045 ms 6.9945 ms]
+                        thrpt:  [458.54 Melem/s 464.51 Melem/s 472.90 Melem/s]
+                 change:
+                        time:   [+7.8667% +9.5373% +11.358%] (p = 0.00 < 0.05)
+                        thrpt:  [-10.199% -8.7069% -7.2930%]
+                        Performance has regressed.
+zstd_4: 481933 bytes
+Benchmarking compression/unpack/zstd_4
+Benchmarking compression/unpack/zstd_4: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_4: Collecting 10 samples in estimated 5.0027 s (100k iterations)
+Benchmarking compression/unpack/zstd_4: Analyzing
+compression/unpack/zstd_4
+                        time:   [48.977 us 49.311 us 49.915 us]
+                        thrpt:  [9.6551 Gelem/s 9.7733 Gelem/s 9.8399 Gelem/s]
+                 change:
+                        time:   [+22963% +23224% +23515%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.577% -99.571% -99.566%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking compression/pack/zstd_5
+Benchmarking compression/pack/zstd_5: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_5: Collecting 10 samples in estimated 5.2017 s (440 iterations)
+Benchmarking compression/pack/zstd_5: Analyzing
+compression/pack/zstd_5 time:   [11.632 ms 11.741 ms 11.975 ms]
+                        thrpt:  [267.84 Melem/s 273.16 Melem/s 275.74 Melem/s]
+                 change:
+                        time:   [-57.386% -55.698% -53.536%] (p = 0.00 < 0.05)
+                        thrpt:  [+115.22% +125.73% +134.66%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+zstd_5: 464012 bytes
+Benchmarking compression/unpack/zstd_5
+Benchmarking compression/unpack/zstd_5: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_5: Collecting 10 samples in estimated 5.0005 s (103k iterations)
+Benchmarking compression/unpack/zstd_5: Analyzing
+compression/unpack/zstd_5
+                        time:   [48.247 us 48.401 us 48.666 us]
+                        thrpt:  [9.5346 Gelem/s 9.5868 Gelem/s 9.6175 Gelem/s]
+                 change:
+                        time:   [+22671% +23034% +23545%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.577% -99.568% -99.561%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/zstd_6
+Benchmarking compression/pack/zstd_6: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_6: Collecting 10 samples in estimated 5.2110 s (385 iterations)
+Benchmarking compression/pack/zstd_6: Analyzing
+compression/pack/zstd_6 time:   [13.423 ms 13.572 ms 13.854 ms]
+                        thrpt:  [231.50 Melem/s 236.32 Melem/s 238.93 Melem/s]
+                 change:
+                        time:   [-56.387% -54.655% -52.630%] (p = 0.00 < 0.05)
+                        thrpt:  [+111.10% +120.53% +129.29%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+zstd_6: 457444 bytes
+Benchmarking compression/unpack/zstd_6
+Benchmarking compression/unpack/zstd_6: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_6: Collecting 10 samples in estimated 5.0001 s (109k iterations)
+Benchmarking compression/unpack/zstd_6: Analyzing
+compression/unpack/zstd_6
+                        time:   [45.747 us 46.150 us 46.451 us]
+                        thrpt:  [9.8478 Gelem/s 9.9121 Gelem/s 9.9993 Gelem/s]
+                 change:
+                        time:   [+21391% +21568% +21737%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.542% -99.538% -99.535%]
+                        Performance has regressed.
+Benchmarking compression/pack/zstd_7
+Benchmarking compression/pack/zstd_7: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_7: Collecting 10 samples in estimated 5.6361 s (275 iterations)
+Benchmarking compression/pack/zstd_7: Analyzing
+compression/pack/zstd_7 time:   [20.224 ms 20.711 ms 21.206 ms]
+                        thrpt:  [151.25 Melem/s 154.86 Melem/s 158.58 Melem/s]
+                 change:
+                        time:   [-31.170% -28.738% -26.324%] (p = 0.00 < 0.05)
+                        thrpt:  [+35.729% +40.327% +45.285%]
+                        Performance has improved.
+zstd_7: 419632 bytes
+Benchmarking compression/unpack/zstd_7
+Benchmarking compression/unpack/zstd_7: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_7: Collecting 10 samples in estimated 5.0014 s (128k iterations)
+Benchmarking compression/unpack/zstd_7: Analyzing
+compression/unpack/zstd_7
+                        time:   [39.005 us 39.143 us 39.360 us]
+                        thrpt:  [10.661 Gelem/s 10.720 Gelem/s 10.758 Gelem/s]
+                 change:
+                        time:   [+18418% +18520% +18653%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.467% -99.463% -99.460%]
+                        Performance has regressed.
+Benchmarking compression/pack/zstd_8
+Benchmarking compression/pack/zstd_8: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_8: Collecting 10 samples in estimated 5.2343 s (220 iterations)
+Benchmarking compression/pack/zstd_8: Analyzing
+compression/pack/zstd_8 time:   [25.106 ms 26.017 ms 26.819 ms]
+                        thrpt:  [119.59 Melem/s 123.27 Melem/s 127.75 Melem/s]
+                 change:
+                        time:   [-17.212% -12.606% -6.6615%] (p = 0.00 < 0.05)
+                        thrpt:  [+7.1369% +14.424% +20.791%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+zstd_8: 408464 bytes
+Benchmarking compression/unpack/zstd_8
+Benchmarking compression/unpack/zstd_8: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_8: Collecting 10 samples in estimated 5.0005 s (131k iterations)
+Benchmarking compression/unpack/zstd_8: Analyzing
+compression/unpack/zstd_8
+                        time:   [38.093 us 38.226 us 38.488 us]
+                        thrpt:  [10.613 Gelem/s 10.686 Gelem/s 10.723 Gelem/s]
+                 change:
+                        time:   [+17244% +17385% +17577%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.434% -99.428% -99.423%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/zstd_9
+Benchmarking compression/pack/zstd_9: Warming up for 3.0000 s
+Benchmarking compression/pack/zstd_9: Collecting 10 samples in estimated 5.2334 s (165 iterations)
+Benchmarking compression/pack/zstd_9: Analyzing
+compression/pack/zstd_9 time:   [31.683 ms 32.508 ms 33.432 ms]
+                        thrpt:  [95.934 Melem/s 98.660 Melem/s 101.23 Melem/s]
+                 change:
+                        time:   [+2.1184% +7.6266% +16.397%] (p = 0.03 < 0.05)
+                        thrpt:  [-14.087% -7.0862% -2.0745%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+zstd_9: 404551 bytes
+Benchmarking compression/unpack/zstd_9
+Benchmarking compression/unpack/zstd_9: Warming up for 3.0000 s
+Benchmarking compression/unpack/zstd_9: Collecting 10 samples in estimated 5.0011 s (136k iterations)
+Benchmarking compression/unpack/zstd_9: Analyzing
+compression/unpack/zstd_9
+                        time:   [36.515 us 36.702 us 36.975 us]
+                        thrpt:  [10.941 Gelem/s 11.023 Gelem/s 11.079 Gelem/s]
+                 change:
+                        time:   [+17054% +17241% +17432%] (p = 0.00 < 0.05)
+                        thrpt:  [-99.430% -99.423% -99.417%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+Benchmarking compression/pack/snap
+Benchmarking compression/pack/snap: Warming up for 3.0000 s
+Benchmarking compression/pack/snap: Collecting 10 samples in estimated 5.1020 s (1705 iterations)
+Benchmarking compression/pack/snap: Analyzing
+compression/pack/snap   time:   [2.9838 ms 3.0116 ms 3.0493 ms]
+                        thrpt:  [1.0518 Gelem/s 1.0650 Gelem/s 1.0749 Gelem/s]
+                 change:
+                        time:   [+113.26% +122.98% +132.92%] (p = 0.00 < 0.05)
+                        thrpt:  [-57.066% -55.153% -53.110%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+snap: 993450 bytes
+Benchmarking compression/unpack/snap
+Benchmarking compression/unpack/snap: Warming up for 3.0000 s
+Benchmarking compression/unpack/snap: Collecting 10 samples in estimated 5.0279 s (3300 iterations)
+Benchmarking compression/unpack/snap: Analyzing
+compression/unpack/snap time:   [1.5194 ms 1.5378 ms 1.5691 ms]
+                        thrpt:  [633.14 Melem/s 646.04 Melem/s 653.83 Melem/s]
+                 change:
+                        time:   [+23.718% +42.464% +63.691%] (p = 0.00 < 0.05)
+                        thrpt:  [-38.909% -29.807% -19.171%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking compression/pack/deflate-Fast
+Benchmarking compression/pack/deflate-Fast: Warming up for 3.0000 s
+Benchmarking compression/pack/deflate-Fast: Collecting 10 samples in estimated 5.1419 s (275 iterations)
+Benchmarking compression/pack/deflate-Fast: Analyzing
+compression/pack/deflate-Fast
+                        time:   [18.911 ms 19.001 ms 19.111 ms]
+                        thrpt:  [167.82 Melem/s 168.80 Melem/s 169.60 Melem/s]
+                 change:
+                        time:   [-82.996% -82.698% -82.340%] (p = 0.00 < 0.05)
+                        thrpt:  [+466.25% +477.98% +488.10%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+deflate-Fast: 692936 bytes
+Benchmarking compression/unpack/deflate-Fast
+Benchmarking compression/unpack/deflate-Fast: Warming up for 3.0000 s
+Benchmarking compression/unpack/deflate-Fast: Collecting 10 samples in estimated 5.7788 s (330 iterations)
+Benchmarking compression/unpack/deflate-Fast: Analyzing
+compression/unpack/deflate-Fast
+                        time:   [17.184 ms 17.272 ms 17.409 ms]
+                        thrpt:  [39.803 Melem/s 40.118 Melem/s 40.324 Melem/s]
+                 change:
+                        time:   [-91.836% -91.705% -91.523%] (p = 0.00 < 0.05)
+                        thrpt:  [+1079.6% +1105.5% +1124.8%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/deflate-Default
+Benchmarking compression/pack/deflate-Default: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 5.7sor enable flat sampling.
+Benchmarking compression/pack/deflate-Default: Collecting 10 samples in estimated 5.7409 s (55 iterations)
+Benchmarking compression/pack/deflate-Default: Analyzing
+compression/pack/deflate-Default
+                        time:   [102.60 ms 103.00 ms 103.63 ms]
+                        thrpt:  [30.948 Melem/s 31.140 Melem/s 31.260 Melem/s]
+                 change:
+                        time:   [-52.186% -51.743% -51.327%] (p = 0.00 < 0.05)
+                        thrpt:  [+105.45% +107.22% +109.14%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high severe
+deflate-Default: 510688 bytes
+Benchmarking compression/unpack/deflate-Default
+Benchmarking compression/unpack/deflate-Default: Warming up for 3.0000 s
+Benchmarking compression/unpack/deflate-Default: Collecting 10 samples in estimated 5.2226 s (385 iterations)
+Benchmarking compression/unpack/deflate-Default: Analyzing
+compression/unpack/deflate-Default
+                        time:   [13.466 ms 13.548 ms 13.663 ms]
+                        thrpt:  [37.378 Melem/s 37.695 Melem/s 37.924 Melem/s]
+                 change:
+                        time:   [-93.547% -93.408% -93.198%] (p = 0.00 < 0.05)
+                        thrpt:  [+1370.3% +1417.0% +1449.6%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/deflate-Best
+Benchmarking compression/pack/deflate-Best: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 5.9s.
+Benchmarking compression/pack/deflate-Best: Collecting 10 samples in estimated 5.9405 s (10 iterations)
+Benchmarking compression/pack/deflate-Best: Analyzing
+compression/pack/deflate-Best
+                        time:   [592.68 ms 596.28 ms 601.61 ms]
+                        thrpt:  [5.3311 Melem/s 5.3788 Melem/s 5.4114 Melem/s]
+                 change:
+                        time:   [+180.90% +183.68% +186.88%] (p = 0.00 < 0.05)
+                        thrpt:  [-65.142% -64.749% -64.401%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+deflate-Best: 498054 bytes
+Benchmarking compression/unpack/deflate-Best
+Benchmarking compression/unpack/deflate-Best: Warming up for 3.0000 s
+Benchmarking compression/unpack/deflate-Best: Collecting 10 samples in estimated 5.1016 s (385 iterations)
+Benchmarking compression/unpack/deflate-Best: Analyzing
+compression/unpack/deflate-Best
+                        time:   [13.134 ms 13.204 ms 13.372 ms]
+                        thrpt:  [37.247 Melem/s 37.719 Melem/s 37.921 Melem/s]
+                 change:
+                        time:   [-93.698% -93.571% -93.426%] (p = 0.00 < 0.05)
+                        thrpt:  [+1421.3% +1455.5% +1486.8%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking compression/pack/flate2-1
+Benchmarking compression/pack/flate2-1: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-1: Collecting 10 samples in estimated 5.1992 s (440 iterations)
+Benchmarking compression/pack/flate2-1: Analyzing
+compression/pack/flate2-1
+                        time:   [11.827 ms 11.895 ms 11.978 ms]
+                        thrpt:  [267.76 Melem/s 269.63 Melem/s 271.17 Melem/s]
+                 change:
+                        time:   [-78.283% -78.119% -77.899%] (p = 0.00 < 0.05)
+                        thrpt:  [+352.47% +357.01% +360.46%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+flate2-1: 705536 bytes
+Benchmarking compression/unpack/flate2-1
+Benchmarking compression/unpack/flate2-1: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-1: Collecting 10 samples in estimated 5.3007 s (935 iterations)
+Benchmarking compression/unpack/flate2-1: Analyzing
+compression/unpack/flate2-1
+                        time:   [5.7094 ms 5.7891 ms 5.8821 ms]
+                        thrpt:  [168.89 Melem/s 171.61 Melem/s 174.00 Melem/s]
+                 change:
+                        time:   [-75.189% -74.719% -74.180%] (p = 0.00 < 0.05)
+                        thrpt:  [+287.30% +295.55% +303.05%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+Benchmarking compression/pack/flate2-2
+Benchmarking compression/pack/flate2-2: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-2: Collecting 10 samples in estimated 5.0178 s (275 iterations)
+Benchmarking compression/pack/flate2-2: Analyzing
+compression/pack/flate2-2
+                        time:   [18.078 ms 18.268 ms 18.452 ms]
+                        thrpt:  [173.82 Melem/s 175.57 Melem/s 177.41 Melem/s]
+                 change:
+                        time:   [-92.551% -92.447% -92.309%] (p = 0.00 < 0.05)
+                        thrpt:  [+1200.2% +1224.0% +1242.4%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+flate2-2: 619885 bytes
+Benchmarking compression/unpack/flate2-2
+Benchmarking compression/unpack/flate2-2: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-2: Collecting 10 samples in estimated 5.1729 s (990 iterations)
+Benchmarking compression/unpack/flate2-2: Analyzing
+compression/unpack/flate2-2
+                        time:   [5.2313 ms 5.2633 ms 5.3335 ms]
+                        thrpt:  [186.27 Melem/s 188.75 Melem/s 189.90 Melem/s]
+                 change:
+                        time:   [+499.92% +518.05% +540.84%] (p = 0.00 < 0.05)
+                        thrpt:  [-84.396% -83.820% -83.331%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high severe
+Benchmarking compression/pack/flate2-3
+Benchmarking compression/pack/flate2-3: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-3: Collecting 10 samples in estimated 6.2303 s (220 iterations)
+Benchmarking compression/pack/flate2-3: Analyzing
+compression/pack/flate2-3
+                        time:   [28.318 ms 28.473 ms 28.850 ms]
+                        thrpt:  [111.17 Melem/s 112.64 Melem/s 113.26 Melem/s]
+                 change:
+                        time:   [-88.255% -87.886% -87.406%] (p = 0.00 < 0.05)
+                        thrpt:  [+694.03% +725.48% +751.42%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+flate2-3: 549306 bytes
+Benchmarking compression/unpack/flate2-3
+Benchmarking compression/unpack/flate2-3: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-3: Collecting 10 samples in estimated 5.0569 s (1100 iterations)
+Benchmarking compression/unpack/flate2-3: Analyzing
+compression/unpack/flate2-3
+                        time:   [4.5370 ms 4.5476 ms 4.5584 ms]
+                        thrpt:  [217.94 Melem/s 218.46 Melem/s 218.97 Melem/s]
+                 change:
+                        time:   [+360.30% +387.48% +413.87%] (p = 0.00 < 0.05)
+                        thrpt:  [-80.540% -79.486% -78.275%]
+                        Performance has regressed.
+Found 3 outliers among 10 measurements (30.00%)
+  1 (10.00%) low mild
+  2 (20.00%) high severe
+Benchmarking compression/pack/flate2-4
+Benchmarking compression/pack/flate2-4: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-4: Collecting 10 samples in estimated 6.5827 s (220 iterations)
+Benchmarking compression/pack/flate2-4: Analyzing
+compression/pack/flate2-4
+                        time:   [29.910 ms 30.172 ms 30.469 ms]
+                        thrpt:  [105.26 Melem/s 106.30 Melem/s 107.23 Melem/s]
+                 change:
+                        time:   [-87.833% -87.679% -87.527%] (p = 0.00 < 0.05)
+                        thrpt:  [+701.71% +711.63% +721.87%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+flate2-4: 546679 bytes
+Benchmarking compression/unpack/flate2-4
+Benchmarking compression/unpack/flate2-4: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-4: Collecting 10 samples in estimated 5.1634 s (1155 iterations)
+Benchmarking compression/unpack/flate2-4: Analyzing
+compression/unpack/flate2-4
+                        time:   [4.4827 ms 4.5075 ms 4.5479 ms]
+                        thrpt:  [218.44 Melem/s 220.40 Melem/s 221.62 Melem/s]
+                 change:
+                        time:   [+360.36% +382.44% +403.03%] (p = 0.00 < 0.05)
+                        thrpt:  [-80.121% -79.272% -78.278%]
+                        Performance has regressed.
+Benchmarking compression/pack/flate2-5
+Benchmarking compression/pack/flate2-5: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-5: Collecting 10 samples in estimated 6.5338 s (165 iterations)
+Benchmarking compression/pack/flate2-5: Analyzing
+compression/pack/flate2-5
+                        time:   [39.217 ms 39.279 ms 39.333 ms]
+                        thrpt:  [81.541 Melem/s 81.653 Melem/s 81.782 Melem/s]
+                 change:
+                        time:   [-83.928% -83.845% -83.772%] (p = 0.00 < 0.05)
+                        thrpt:  [+516.22% +519.00% +522.20%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+flate2-5: 531571 bytes
+Benchmarking compression/unpack/flate2-5
+Benchmarking compression/unpack/flate2-5: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-5: Collecting 10 samples in estimated 5.0613 s (1155 iterations)
+Benchmarking compression/unpack/flate2-5: Analyzing
+compression/unpack/flate2-5
+                        time:   [4.2910 ms 4.3011 ms 4.3196 ms]
+                        thrpt:  [229.98 Melem/s 230.98 Melem/s 231.52 Melem/s]
+                 change:
+                        time:   [+294.95% +333.19% +372.70%] (p = 0.00 < 0.05)
+                        thrpt:  [-78.845% -76.916% -74.681%]
+                        Performance has regressed.
+Benchmarking compression/pack/flate2-6
+Benchmarking compression/pack/flate2-6: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-6: Collecting 10 samples in estimated 9.8578 s (110 iterations)
+Benchmarking compression/pack/flate2-6: Analyzing
+compression/pack/flate2-6
+                        time:   [89.108 ms 89.266 ms 89.630 ms]
+                        thrpt:  [35.783 Melem/s 35.929 Melem/s 35.993 Melem/s]
+                 change:
+                        time:   [-63.735% -63.344% -62.905%] (p = 0.00 < 0.05)
+                        thrpt:  [+169.58% +172.80% +175.75%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+flate2-6: 511734 bytes
+Benchmarking compression/unpack/flate2-6
+Benchmarking compression/unpack/flate2-6: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-6: Collecting 10 samples in estimated 5.2233 s (1265 iterations)
+Benchmarking compression/unpack/flate2-6: Analyzing
+compression/unpack/flate2-6
+                        time:   [4.0780 ms 4.1003 ms 4.1209 ms]
+                        thrpt:  [241.07 Melem/s 242.28 Melem/s 243.61 Melem/s]
+                 change:
+                        time:   [+341.63% +354.50% +366.46%] (p = 0.00 < 0.05)
+                        thrpt:  [-78.562% -77.998% -77.357%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/flate2-7
+Benchmarking compression/pack/flate2-7: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 7.5sor enable flat sampling.
+Benchmarking compression/pack/flate2-7: Collecting 10 samples in estimated 7.4978 s (55 iterations)
+Benchmarking compression/pack/flate2-7: Analyzing
+compression/pack/flate2-7
+                        time:   [136.78 ms 137.42 ms 138.30 ms]
+                        thrpt:  [23.190 Melem/s 23.339 Melem/s 23.449 Melem/s]
+                 change:
+                        time:   [-45.245% -44.740% -44.178%] (p = 0.00 < 0.05)
+                        thrpt:  [+79.141% +80.962% +82.632%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+flate2-7: 505345 bytes
+Benchmarking compression/unpack/flate2-7
+Benchmarking compression/unpack/flate2-7: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-7: Collecting 10 samples in estimated 5.1250 s (1265 iterations)
+Benchmarking compression/unpack/flate2-7: Analyzing
+compression/unpack/flate2-7
+                        time:   [3.9995 ms 4.0079 ms 4.0218 ms]
+                        thrpt:  [247.01 Melem/s 247.87 Melem/s 248.40 Melem/s]
+                 change:
+                        time:   [+254.47% +287.67% +322.56%] (p = 0.00 < 0.05)
+                        thrpt:  [-76.335% -74.205% -71.789%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/flate2-8
+Benchmarking compression/pack/flate2-8: Warming up for 3.0000 s
+Benchmarking compression/pack/flate2-8: Collecting 10 samples in estimated 6.4813 s (30 iterations)
+Benchmarking compression/pack/flate2-8: Analyzing
+compression/pack/flate2-8
+                        time:   [214.46 ms 215.38 ms 216.46 ms]
+                        thrpt:  [14.817 Melem/s 14.891 Melem/s 14.955 Melem/s]
+                 change:
+                        time:   [-11.962% -11.370% -10.705%] (p = 0.00 < 0.05)
+                        thrpt:  [+11.988% +12.828% +13.588%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+flate2-8: 501494 bytes
+Benchmarking compression/unpack/flate2-8
+Benchmarking compression/unpack/flate2-8: Warming up for 3.0000 s
+Benchmarking compression/unpack/flate2-8: Collecting 10 samples in estimated 5.1976 s (1320 iterations)
+Benchmarking compression/unpack/flate2-8: Analyzing
+compression/unpack/flate2-8
+                        time:   [3.9549 ms 3.9719 ms 3.9966 ms]
+                        thrpt:  [248.58 Melem/s 250.12 Melem/s 251.19 Melem/s]
+                 change:
+                        time:   [+338.71% +353.46% +370.90%] (p = 0.00 < 0.05)
+                        thrpt:  [-78.764% -77.947% -77.206%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/yazi-BestSpeed
+Benchmarking compression/pack/yazi-BestSpeed: Warming up for 3.0000 s
+Benchmarking compression/pack/yazi-BestSpeed: Collecting 10 samples in estimated 5.6211 s (330 iterations)
+Benchmarking compression/pack/yazi-BestSpeed: Analyzing
+compression/pack/yazi-BestSpeed
+                        time:   [16.957 ms 17.046 ms 17.240 ms]
+                        thrpt:  [186.04 Melem/s 188.15 Melem/s 189.14 Melem/s]
+                 change:
+                        time:   [-92.620% -92.519% -92.377%] (p = 0.00 < 0.05)
+                        thrpt:  [+1211.8% +1236.7% +1255.1%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+yazi-BestSpeed: 691183 bytes
+Benchmarking compression/unpack/yazi-BestSpeed
+Benchmarking compression/unpack/yazi-BestSpeed: Warming up for 3.0000 s
+Benchmarking compression/unpack/yazi-BestSpeed: Collecting 10 samples in estimated 5.1412 s (1430 iterations)
+Benchmarking compression/unpack/yazi-BestSpeed: Analyzing
+compression/unpack/yazi-BestSpeed
+                        time:   [3.5672 ms 3.5880 ms 3.6469 ms]
+                        thrpt:  [189.52 Melem/s 192.64 Melem/s 193.76 Melem/s]
+                 change:
+                        time:   [+286.24% +300.08% +313.24%] (p = 0.00 < 0.05)
+                        thrpt:  [-75.801% -75.005% -74.109%]
+                        Performance has regressed.
+Benchmarking compression/pack/yazi-Default
+Benchmarking compression/pack/yazi-Default: Warming up for 3.0000 s
+Benchmarking compression/pack/yazi-Default: Collecting 10 samples in estimated 9.6680 s (110 iterations)
+Benchmarking compression/pack/yazi-Default: Analyzing
+compression/pack/yazi-Default
+                        time:   [87.345 ms 87.689 ms 88.144 ms]
+                        thrpt:  [36.387 Melem/s 36.575 Melem/s 36.719 Melem/s]
+                 change:
+                        time:   [-65.137% -64.917% -64.626%] (p = 0.00 < 0.05)
+                        thrpt:  [+182.70% +185.04% +186.84%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+yazi-Default: 511734 bytes
+Benchmarking compression/unpack/yazi-Default
+Benchmarking compression/unpack/yazi-Default: Warming up for 3.0000 s
+Benchmarking compression/unpack/yazi-Default: Collecting 10 samples in estimated 5.0708 s (2145 iterations)
+Benchmarking compression/unpack/yazi-Default: Analyzing
+compression/unpack/yazi-Default
+                        time:   [2.3349 ms 2.3545 ms 2.3756 ms]
+                        thrpt:  [215.42 Melem/s 217.35 Melem/s 219.17 Melem/s]
+                 change:
+                        time:   [+169.73% +178.53% +189.85%] (p = 0.00 < 0.05)
+                        thrpt:  [-65.500% -64.097% -62.925%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+Benchmarking compression/pack/yazi-BestSize
+Benchmarking compression/pack/yazi-BestSize: Warming up for 3.0000 s
+Benchmarking compression/pack/yazi-BestSize: Collecting 10 samples in estimated 5.6522 s (20 iterations)
+Benchmarking compression/pack/yazi-BestSize: Analyzing
+compression/pack/yazi-BestSize
+                        time:   [280.46 ms 281.16 ms 282.06 ms]
+                        thrpt:  [11.371 Melem/s 11.407 Melem/s 11.436 Melem/s]
+                 change:
+                        time:   [+11.138% +12.075% +12.904%] (p = 0.00 < 0.05)
+                        thrpt:  [-11.429% -10.774% -10.022%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+yazi-BestSize: 500247 bytes
+Benchmarking compression/unpack/yazi-BestSize
+Benchmarking compression/unpack/yazi-BestSize: Warming up for 3.0000 s
+Benchmarking compression/unpack/yazi-BestSize: Collecting 10 samples in estimated 5.0404 s (2255 iterations)
+Benchmarking compression/unpack/yazi-BestSize: Analyzing
+compression/unpack/yazi-BestSize
+                        time:   [2.2499 ms 2.3059 ms 2.3790 ms]
+                        thrpt:  [210.28 Melem/s 216.95 Melem/s 222.34 Melem/s]
+                 change:
+                        time:   [+113.93% +132.92% +152.75%] (p = 0.00 < 0.05)
+                        thrpt:  [-60.436% -57.067% -53.257%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking compression/pack/lzma
+Benchmarking compression/pack/lzma: Warming up for 3.0000 s
+Benchmarking compression/pack/lzma: Collecting 10 samples in estimated 5.8545 s (110 iterations)
+Benchmarking compression/pack/lzma: Analyzing
+compression/pack/lzma   time:   [53.137 ms 53.495 ms 53.964 ms]
+                        thrpt:  [59.433 Melem/s 59.954 Melem/s 60.358 Melem/s]
+                 change:
+                        time:   [-85.568% -85.454% -85.344%] (p = 0.00 < 0.05)
+                        thrpt:  [+582.34% +587.48% +592.92%]
+                        Performance has improved.
+Found 3 outliers among 10 measurements (30.00%)
+  1 (10.00%) low severe
+  2 (20.00%) high severe
+lzma: 1131078 bytes
+Benchmarking compression/unpack/lzma
+Benchmarking compression/unpack/lzma: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 5.7sor enable flat sampling.
+Benchmarking compression/unpack/lzma: Collecting 10 samples in estimated 5.7152 s (55 iterations)
+Benchmarking compression/unpack/lzma: Analyzing
+compression/unpack/lzma time:   [103.17 ms 103.29 ms 103.43 ms]
+                        thrpt:  [10.936 Melem/s 10.951 Melem/s 10.963 Melem/s]
+                 change:
+                        time:   [-83.743% -83.610% -83.470%] (p = 0.00 < 0.05)
+                        thrpt:  [+504.96% +510.12% +515.13%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking compression/pack/lzma2
+Benchmarking compression/pack/lzma2: Warming up for 3.0000 s
+Benchmarking compression/pack/lzma2: Collecting 10 samples in estimated 5.0067 s (32k iterations)
+Benchmarking compression/pack/lzma2: Analyzing
+compression/pack/lzma2  time:   [154.32 us 154.87 us 155.76 us]
+                        thrpt:  [20.591 Gelem/s 20.709 Gelem/s 20.783 Gelem/s]
+                 change:
+                        time:   [-86.753% -85.932% -85.171%] (p = 0.00 < 0.05)
+                        thrpt:  [+574.37% +610.85% +654.89%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+lzma2: 3207394 bytes
+Benchmarking compression/unpack/lzma2
+Benchmarking compression/unpack/lzma2: Warming up for 3.0000 s
+Benchmarking compression/unpack/lzma2: Collecting 10 samples in estimated 5.0137 s (18k iterations)
+Benchmarking compression/unpack/lzma2: Analyzing
+compression/unpack/lzma2
+                        time:   [271.26 us 279.54 us 287.68 us]
+                        thrpt:  [11.149 Gelem/s 11.474 Gelem/s 11.824 Gelem/s]
+                 change:
+                        time:   [-82.480% -81.763% -80.897%] (p = 0.00 < 0.05)
+                        thrpt:  [+423.47% +448.34% +470.79%]
+                        Performance has improved.
+Benchmarking compression/pack/lzma_xz
+Benchmarking compression/pack/lzma_xz: Warming up for 3.0000 s
+Benchmarking compression/pack/lzma_xz: Collecting 10 samples in estimated 5.0014 s (29k iterations)
+Benchmarking compression/pack/lzma_xz: Analyzing
+compression/pack/lzma_xz
+                        time:   [159.60 us 162.90 us 169.80 us]
+                        thrpt:  [18.888 Gelem/s 19.689 Gelem/s 20.095 Gelem/s]
+                 change:
+                        time:   [-88.504% -86.849% -84.959%] (p = 0.00 < 0.05)
+                        thrpt:  [+564.84% +660.40% +769.88%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+lzma_xz: 3207448 bytes
+Benchmarking compression/unpack/lzma_xz
+Benchmarking compression/unpack/lzma_xz: Warming up for 3.0000 s
+Benchmarking compression/unpack/lzma_xz: Collecting 10 samples in estimated 5.0167 s (11k iterations)
+Benchmarking compression/unpack/lzma_xz: Analyzing
+compression/unpack/lzma_xz
+                        time:   [430.19 us 434.06 us 439.98 us]
+                        thrpt:  [7.2899 Gelem/s 7.3895 Gelem/s 7.4558 Gelem/s]
+                 change:
+                        time:   [-87.940% -87.020% -85.948%] (p = 0.00 < 0.05)
+                        thrpt:  [+611.62% +670.40% +729.18%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+Benchmarking compression/pack/zopfli
+Benchmarking compression/pack/zopfli: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 420.9s.
+Benchmarking compression/pack/zopfli: Collecting 10 samples in estimated 420.87 s (10 iterations)
+Benchmarking compression/pack/zopfli: Analyzing
+compression/pack/zopfli time:   [42.367 s 42.483 s 42.597 s]
+                        thrpt:  [75.293 Kelem/s 75.495 Kelem/s 75.701 Kelem/s]
+                 change:
+                        time:   [+208.46% +213.93% +219.70%] (p = 0.00 < 0.05)
+                        thrpt:  [-68.721% -68.146% -67.581%]
+                        Performance has regressed.
+zopfli: 464437 bytes
+Benchmarking compression/pack/brotli
+Benchmarking compression/pack/brotli: Warming up for 3.0000 s
+
+Warning: Unable to complete 10 samples in 5.0s. You may wish to increase target time to 51.0s.
+Benchmarking compression/pack/brotli: Collecting 10 samples in estimated 50.969 s (10 iterations)
+Benchmarking compression/pack/brotli: Analyzing
+compression/pack/brotli time:   [5.0349 s 5.0572 s 5.0828 s]
+                        thrpt:  [631.00 Kelem/s 634.19 Kelem/s 637.00 Kelem/s]
+                 change:
+                        time:   [-10.068% -8.9962% -8.1451%] (p = 0.00 < 0.05)
+                        thrpt:  [+8.8674% +9.8855% +11.196%]
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+brotli: 301546 bytes
+Benchmarking compression/unpack/brotli
+Benchmarking compression/unpack/brotli: Warming up for 3.0000 s
+Benchmarking compression/unpack/brotli: Collecting 10 samples in estimated 5.1033 s (990 iterations)
+Benchmarking compression/unpack/brotli: Analyzing
+compression/unpack/brotli
+                        time:   [5.1837 ms 5.2807 ms 5.4388 ms]
+                        thrpt:  [55.444 Melem/s 57.103 Melem/s 58.172 Melem/s]
+                 change:
+                        time:   [-8.9114% -5.9977% -3.0108%] (p = 0.00 < 0.05)
+                        thrpt:  [+3.1042% +6.3803% +9.7832%]
+                        Performance has improved.
+Benchmarking compression/pack/tar
+Benchmarking compression/pack/tar: Warming up for 3.0000 s
+Benchmarking compression/pack/tar: Collecting 10 samples in estimated 5.0009 s (35k iterations)
+Benchmarking compression/pack/tar: Analyzing
+compression/pack/tar    time:   [131.41 us 139.26 us 153.65 us]
+                        thrpt:  [20.874 Gelem/s 23.031 Gelem/s 24.407 Gelem/s]
+                 change:
+                        time:   [-83.229% -82.209% -80.846%] (p = 0.00 < 0.05)
+                        thrpt:  [+422.10% +462.08% +496.26%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+tar: 3209216 bytes
+Benchmarking compression/pack/zip
+Benchmarking compression/pack/zip: Warming up for 3.0000 s
+Benchmarking compression/pack/zip: Collecting 10 samples in estimated 5.3160 s (605 iterations)
+Benchmarking compression/pack/zip: Analyzing
+compression/pack/zip    time:   [8.7805 ms 8.9649 ms 9.1319 ms]
+                        thrpt:  [351.21 Melem/s 357.76 Melem/s 365.27 Melem/s]
+                 change:
+                        time:   [+650.14% +659.68% +670.64%] (p = 0.00 < 0.05)
+                        thrpt:  [-87.024% -86.836% -86.669%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+zip: 55602 bytes
+Benchmarking compression/unpack/zip
+Benchmarking compression/unpack/zip: Warming up for 3.0000 s
+Benchmarking compression/unpack/zip: Collecting 10 samples in estimated 5.0384 s (7095 iterations)
+Benchmarking compression/unpack/zip: Analyzing
+compression/unpack/zip  time:   [707.23 us 709.97 us 714.31 us]
+                        thrpt:  [77.840 Melem/s 78.316 Melem/s 78.619 Melem/s]
+                 change:
+                        time:   [+195.76% +202.38% +207.37%] (p = 0.00 < 0.05)
+                        thrpt:  [-67.466% -66.930% -66.189%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
