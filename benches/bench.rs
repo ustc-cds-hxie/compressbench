@@ -81,15 +81,24 @@ fn compare_compress_i64(c: &mut Criterion) {
 	
 	// println!("Obtained data: {:?}", uncompressed_i64);
 
-	let orig_len = uncompressed_i64.len();
-	let orig_size = orig_len * std::mem::size_of::<i64>();
-	
-	// prepare data structures for benchmark
-	println!("uncompressed_i64: {} items {} bytes", orig_len, orig_size);
-	let mut compressed = Vec::with_capacity(orig_len);
-	let mut unpacked = Vec::with_capacity(orig_len);
+	let orig_i64_len = uncompressed_i64.len();
+	let orig_u8_len = orig_i64_len * std::mem::size_of::<i64>();
 
-	group.throughput(Throughput::Elements(orig_len as u64));
+	println!("uncompressed_i64: {} items {} bytes", orig_i64_len, orig_u8_len);
+
+	let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+	uncompressed_u8.resize(orig_u8_len, 0u8);
+	BigEndian::write_i64_into(&uncompressed_i64, &mut uncompressed_u8);
+
+	println!("uncompressed_u8: {} items {} bytes", uncompressed_u8.len(), 
+		uncompressed_u8.len() * std::mem::size_of::<u8>());
+	
+	let mut compressed = Vec::with_capacity(orig_u8_len);
+
+	let mut unpacked_i64: Vec<i64> = Vec::with_capacity(orig_i64_len);
+	let mut unpacked_u8: Vec<u8> = Vec::with_capacity(orig_u8_len);
+
+	group.throughput(Throughput::Elements(orig_u8_len as u64));
     group.bench_function(BenchmarkId::new("pack", "Q"), |b| {
 		let orig = &uncompressed_i64;
         b.iter(|| {
@@ -100,15 +109,34 @@ fn compare_compress_i64(c: &mut Criterion) {
     println!("Q: {} {} {} {} bytes compression_ratio {:.2}", 
 		uncompressed_i64.len(), uncompressed_i64.len(), 
 		uncompressed_i64.len()*std::mem::size_of::<i64>(), compressed.len(),
-		orig_size as f32 / compressed.len() as f32
+		orig_u8_len as f32 / compressed.len() as f32
 	);
 	group.throughput(Throughput::Elements(compressed.len() as u64));
     group.bench_function(BenchmarkId::new("unpack", "Q"), |b| {
         b.iter(|| {
-            black_box(&mut unpacked).clear();
-			unpacked = auto_decompress::<i64>(black_box(&compressed)).expect("failed to decompress")
+            black_box(&mut unpacked_i64).clear();
+			unpacked_i64 = auto_decompress::<i64>(black_box(&compressed)).expect("failed to decompress")
         })
     });
+
+	// various LZ4 implementtions
+	group.throughput(Throughput::Elements(orig_u8_len as u64));
+    group.bench_function(BenchmarkId::new("pack", "lz4"), |b| {
+		let orig = &uncompressed_u8;
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lz4_compression::compress::compress_into(black_box(orig), black_box(&mut compressed))
+        })
+    });
+    println!("lz4-compression: {} {} bytes compression_ratio {:.2}", uncompressed_u8.len(), compressed.len(), orig_u8_len as f32 / compressed.len() as f32);
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", "lz4"), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            lz4_compression::decompress::decompress_into(black_box(&compressed), black_box(&mut unpacked_u8))
+        })
+    });
+
 }
 
 fn compare_compress(c: &mut Criterion) {
