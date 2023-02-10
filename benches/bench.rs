@@ -24,7 +24,7 @@ fn extract_column_data_from_parquet(input: &str, column: &str, output: &mut Vec<
 	
 	// Writing the type signature here, to be super 
 	// clear about the return type of get_fields()
-	let fields:&[Arc<parquet::schema::types::Type>] = parquet_metadata
+	let _fields:&[Arc<parquet::schema::types::Type>] = parquet_metadata
 		.file_metadata()
 		.schema()
 		.get_fields(); 
@@ -98,21 +98,24 @@ fn compare_compress_i64(c: &mut Criterion) {
 	let mut unpacked_i64: Vec<i64> = Vec::with_capacity(orig_i64_len);
 	let mut unpacked_u8: Vec<u8> = Vec::with_capacity(orig_u8_len);
 
-	group.throughput(Throughput::Elements(orig_u8_len as u64));
-    group.bench_function(BenchmarkId::new("pack", "Q"), |b| {
+	let mut alg_name = "";
+
+	alg_name = "Q";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
 		let orig = &uncompressed_i64;
         b.iter(|| {
             black_box(&mut compressed).clear();
 			compressed = auto_compress(black_box(orig), DEFAULT_COMPRESSION_LEVEL)
         })
     });
-    println!("Q: {} {} {} {} bytes compression_ratio {:.2}", 
-		uncompressed_i64.len(), uncompressed_i64.len(), 
-		uncompressed_i64.len()*std::mem::size_of::<i64>(), compressed.len(),
-		orig_u8_len as f32 / compressed.len() as f32
+    println!("{}: {} {} bytes compression_ratio {:.2}",
+		alg_name, uncompressed_u8.len(), compressed.len(),
+		uncompressed_u8.len() as f32 / compressed.len() as f32
 	);
+
 	group.throughput(Throughput::Elements(compressed.len() as u64));
-    group.bench_function(BenchmarkId::new("unpack", "Q"), |b| {
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
         b.iter(|| {
             black_box(&mut unpacked_i64).clear();
 			unpacked_i64 = auto_decompress::<i64>(black_box(&compressed)).expect("failed to decompress")
@@ -120,22 +123,474 @@ fn compare_compress_i64(c: &mut Criterion) {
     });
 
 	// various LZ4 implementtions
-	group.throughput(Throughput::Elements(orig_u8_len as u64));
-    group.bench_function(BenchmarkId::new("pack", "lz4"), |b| {
+	alg_name = "LZ4";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
 		let orig = &uncompressed_u8;
         b.iter(|| {
             black_box(&mut compressed).clear();
             lz4_compression::compress::compress_into(black_box(orig), black_box(&mut compressed))
         })
     });
-    println!("lz4-compression: {} {} bytes compression_ratio {:.2}", uncompressed_u8.len(), compressed.len(), orig_u8_len as f32 / compressed.len() as f32);
+    println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
 	group.throughput(Throughput::Elements(compressed.len() as u64));
-    group.bench_function(BenchmarkId::new("unpack", "lz4"), |b| {
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
         b.iter(|| {
             black_box(&mut unpacked_u8).clear();
             lz4_compression::decompress::decompress_into(black_box(&compressed), black_box(&mut unpacked_u8))
         })
     });
+
+	// lz4-flex
+	alg_name = "LZ4_flex";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &uncompressed_u8;
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lz4_flex::compress_into(black_box(orig), black_box(&mut compressed))
+        })
+    });
+    println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            lz4_flex::decompress_into(black_box(&compressed), black_box(&mut unpacked_u8))
+        })
+    });
+
+	alg_name = "LZ4_fear";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let lzfear = lz_fear::CompressionSettings::default();
+		let orig = &uncompressed_u8[..];
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lzfear.compress(black_box(orig), black_box(&mut compressed))
+        })
+    });
+    println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            let mut lzfear = lz_fear::LZ4FrameReader::new(black_box(&compressed[..])).unwrap().into_read();
+            black_box(&mut unpacked_u8).clear();
+            lzfear.read_to_end(black_box(&mut unpacked_u8))
+        })
+    });
+
+    {
+		alg_name = "LZZZ_LZ4";
+		use lzzzz::lz4::{compress_to_vec, decompress, ACC_LEVEL_DEFAULT};
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+		group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+			let orig = &uncompressed_u8[..];
+			b.iter(|| {
+				black_box(&mut compressed).clear();
+				compress_to_vec(black_box(orig), black_box(&mut compressed), ACC_LEVEL_DEFAULT)
+			})
+		});
+
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+		group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+			b.iter(|| {
+				black_box(&mut unpacked_u8).clear();
+				decompress(black_box(&compressed), black_box(&mut unpacked_u8))
+			})
+		});
+
+		alg_name = "LZZZ_LZ4HC";
+		use lzzzz::lz4_hc::{compress_to_vec as lz4_hc_compress_to_vec, CLEVEL_DEFAULT};
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+        group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+            let orig = &uncompressed_u8[..];
+            b.iter(|| {
+                black_box(&mut compressed).clear();
+                lz4_hc_compress_to_vec(black_box(orig), black_box(&mut compressed), CLEVEL_DEFAULT)
+            })
+        });
+
+        println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+		
+        // Same as lzzzz/lz4.unpack (just for normalized output / reports)
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+        group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+            b.iter(|| {
+                black_box(&mut unpacked_u8).clear();
+                decompress(black_box(&compressed), black_box(&mut unpacked_u8))
+            })
+        });
+
+		alg_name = "LZZZ_LZ4F";
+        use lzzzz::lz4f::{
+            compress_to_vec as lz4f_compress_to_vec, decompress_to_vec as lz4f_decompress_to_vec,
+            Preferences,
+        };
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+        group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+            let orig = &uncompressed_u8[..];
+            b.iter(|| {
+                black_box(&mut compressed).clear();
+                lz4f_compress_to_vec(black_box(orig), black_box(&mut compressed), &Preferences::default())
+            })
+        });
+        
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+        group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+            b.iter(|| {
+                black_box(&mut unpacked_u8).clear();
+                lz4f_decompress_to_vec(black_box(&compressed), black_box(&mut unpacked_u8))
+            })
+        });
+	}
+	// zstandard
+	for level in 1..10 {
+		let alg_name = &format!("ZSTD-{:?}", level);
+		
+		// first, obtain comp_len
+		let orig = &uncompressed_u8;
+		compressed = zstd::bulk::compress(orig, level).unwrap();
+		
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+		group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+			let orig = &uncompressed_u8;
+			b.iter(|| {
+				compressed = zstd::bulk::compress(black_box(orig), black_box(level)).unwrap();
+			})
+		});
+		
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+		group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+			b.iter(|| {
+				black_box(&mut unpacked_u8).clear();
+				unpacked_u8 = zstd::bulk::decompress( black_box(&mut compressed), orig_u8_len).unwrap();
+			})
+		});
+	}
+	// snappy
+	alg_name = "SNAPPY";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+	group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &uncompressed_u8;
+        b.iter(|| {
+			black_box(&mut compressed).clear();
+			snap::raw::Encoder::new().compress(black_box(orig), black_box(&mut compressed))
+        })
+    });
+
+    println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+			black_box(&mut unpacked_u8).clear();
+			snap::raw::Decoder::new().decompress(black_box(&mut compressed), black_box(&mut unpacked_u8))
+        })
+    });
+	/*
+    group.bench_function("snappy-framed.pack", |b| {
+        b.iter(|| {
+			black_box(&mut compressed).clear();
+			let mut enc = snappy_framed::write::SnappyFramedEncoder::new(black_box(&mut compressed)).unwrap();
+			enc.write_all(black_box(orig)).unwrap();
+			enc.flush().unwrap();
+        })
+    });
+    println!("snappy-framed: {} bytes", compressed.len());
+    group.bench_function("snappy-framed.unpack.nocrc", |b| {
+        b.iter(|| {
+			black_box(&mut unpacked).clear();
+			let mut cursor = Cursor::new(black_box(&compressed));
+			let mut decoder = snappy_framed::read::SnappyFramedDecoder::new(&mut cursor, snappy_framed::read::CrcMode::Ignore);
+			decoder.read_to_end(black_box(&mut unpacked))
+        })
+    });
+    group.bench_function("snappy-framed.unpack.crc", |b| {
+        b.iter(|| {
+			black_box(&mut unpacked).clear();
+			let mut cursor = Cursor::new(&compressed);
+			let mut decoder = snappy_framed::read::SnappyFramedDecoder::new(&mut cursor, snappy_framed::read::CrcMode::Verify);
+            decoder.read_to_end(black_box(&mut unpacked))
+        })
+    });
+	*/
+    // deflate
+    use deflate::Compression;
+    for &level in &[Compression::Fast, Compression::Default, Compression::Best] {
+		let alg_name = &format!("DEFLATE-{:?}", level);
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+		group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+			let orig = &uncompressed_u8;
+			b.iter(|| {
+				black_box(&mut compressed).clear();
+				let mut encoder = deflate::write::DeflateEncoder::new(black_box(std::mem::replace(&mut compressed, Vec::new())), level);
+				encoder.write_all(black_box(orig)).unwrap();
+				compressed = black_box(encoder.finish().unwrap());
+			})
+		});
+
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+		group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+			b.iter(|| {
+				deflate::deflate_bytes(black_box(&compressed))
+			})
+		});
+	}
+
+	// flate
+	for level in flate2::Compression::fast().level() .. flate2::Compression::best().level() {
+
+		let alg_name = &format!("FLATE-{:?}", level);
+
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+		group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+			let orig = &uncompressed_u8;
+			b.iter(|| {
+				black_box(&mut compressed).clear();
+				flate2::Compress::new(flate2::Compression::new(level), false).compress(
+					black_box(orig), 
+					black_box(&mut compressed),
+					flate2::FlushCompress::Finish
+				)
+			})
+		});
+		
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+		group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+			b.iter(|| {
+				black_box(&mut unpacked_u8).clear();
+				flate2::Decompress::new(false).decompress(
+					black_box(&compressed),
+					black_box(&mut unpacked_u8),
+					flate2::FlushDecompress::Finish
+				)
+			})
+		});
+	}
+	use yazi::CompressionLevel;
+	for &level in &[CompressionLevel::BestSpeed, CompressionLevel::Default, CompressionLevel::BestSize] {
+		
+		let alg_name = &format!("YAZI-{:?}", level);
+		
+		group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+		group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+			let orig = &uncompressed_u8[..];
+			b.iter(|| {
+				black_box(&mut compressed).clear();
+				let mut encoder = yazi::Encoder::new();
+				encoder.set_format(yazi::Format::Raw);
+				encoder.set_level(level);
+				let mut stream = encoder.stream_into_vec(black_box(&mut compressed));
+				stream.write(black_box(orig)).unwrap();
+				stream.finish()
+			})
+		});
+		
+		println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+		group.throughput(Throughput::Elements(compressed.len() as u64));
+		group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+			b.iter(|| {
+				black_box(&mut unpacked_u8).clear();
+				let mut decoder = yazi::Decoder::new();
+				decoder.set_format(yazi::Format::Raw);
+				let mut stream = decoder.stream_into_vec(&mut unpacked_u8);
+				stream.write(black_box(&compressed)).unwrap();
+				stream.finish()
+			})
+		});
+	}
+
+	// LZMA
+	alg_name = "LZMA";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+	group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &mut &uncompressed_u8[..];
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lzma_rs::lzma_compress(black_box(orig), black_box(&mut compressed))
+        })
+    });
+
+    println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            lzma_rs::lzma_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked_u8))
+        })
+    });
+
+	alg_name = "LZMA2";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &mut &uncompressed_u8[..];
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lzma_rs::lzma2_compress(black_box(orig), black_box(&mut compressed))
+        })
+    });
+    
+	println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            lzma_rs::lzma2_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked_u8))
+        })
+    });
+
+	alg_name = "LZMA_XZ";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &mut &uncompressed_u8[..];
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            lzma_rs::xz_compress(black_box(orig), black_box(&mut compressed))
+        })
+    });
+    
+	println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            lzma_rs::xz_decompress(black_box(&mut &compressed[..]), black_box(&mut unpacked_u8))
+        })
+    });
+
+	/*
+    // Zopfli
+	alg_name = "ZOPFLI";
+	group.throughput(Throughput::Elements(uncompressed.len() as u64));
+	group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            zopfli::compress(
+				&zopfli::Options::default(),
+				&zopfli::Format::Deflate,
+				black_box(&mut &uncompressed[..]),
+				black_box(&mut compressed)
+			).unwrap()
+        })
+    });
+    println!("zopfli: {} bytes", compressed.len());
+
+    // no decompression here
+
+	*/
+
+    // Brotli
+	alg_name = "BROTLI";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &mut &uncompressed_u8[..];
+        b.iter(|| {
+            black_box(&mut compressed).clear();
+            brotli::BrotliCompress(
+				black_box(orig),
+				black_box(&mut compressed),
+				&Default::default(),
+			)
+        })
+    });
+    
+	println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+    group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+        b.iter(|| {
+            black_box(&mut unpacked_u8).clear();
+            brotli::BrotliDecompress(black_box(&mut &compressed[..]), black_box(&mut unpacked_u8))
+        })
+    });
+
+	/* disable tar, because no unpacking
+    // tar
+	group.throughput(Throughput::Elements(uncompressed.len() as u64));
+    group.bench_function(BenchmarkId::new("pack", "tar"), |b| {
+		compressed.reserve(uncompressed.len()); // double the excitement! ;P
+        b.iter(|| {
+			black_box(&mut compressed).clear();
+			use tar::{Builder, Header};
+
+			let mut header = Header::new_gnu();
+			header.set_path("data").unwrap();
+			header.set_size(4);
+			header.set_cksum();
+
+			let mut ar = Builder::new(std::mem::replace(&mut compressed, Vec::new()));
+			ar.append(&header, &orig[..]).unwrap();
+			compressed = ar.into_inner().unwrap();
+			compressed.len()
+		})
+	});
+	println!("tar: {} bytes", compressed.len());
+	// unfortunately, tar only unpacks to disk, so this result would be
+	// incomparable. Perhaps in a later benchmark.
+
+	*/
+	
+    // zip
+	alg_name = "ZIP";
+	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
+	group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
+		let orig = &uncompressed_u8;
+        b.iter(|| {
+			black_box(&mut compressed).clear();
+			let mut zipw = zip::ZipWriter::new(Cursor::new(black_box(Vec::new())));
+			let options = zip::write::FileOptions::default();
+        			// .compression_method(zip::CompressionMethod::Stored)
+        			// .unix_permissions(0o755);
+			zipw.start_file("data", options).unwrap();
+			zipw.write_all(black_box(orig)).unwrap();
+			let c = zipw.finish().unwrap();
+			compressed = c.into_inner();
+		})
+	});
+	
+	println!("{}: {} {} bytes compression_ratio {:.2}", alg_name, uncompressed_u8.len(), compressed.len(), 
+		orig_u8_len as f32 / compressed.len() as f32);
+
+	group.throughput(Throughput::Elements(compressed.len() as u64));
+	group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
+		b.iter(|| {
+			black_box(&mut unpacked_u8).clear();
+			let mut zipr = zip::ZipArchive::new(Cursor::new(black_box(&compressed))).unwrap();
+			zipr.by_index(0).unwrap().read_to_end(black_box(&mut unpacked_u8)).unwrap();
+		})
+	});
+
+	group.finish();
 
 }
 
