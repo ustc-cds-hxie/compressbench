@@ -75,9 +75,13 @@ fn compare_compress_i64(c: &mut Criterion) {
 
 	let mut uncompressed_i64: Vec<i64> = Vec::new();
 
-	extract_column_data_from_parquet(&std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS"), 
-			"timestamp", 
-			&mut uncompressed_i64);
+	extract_column_data_from_parquet(
+		// parquet file
+		&std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS"), 
+		// column in parquet
+		&std::env::var("PARQUET_COLUMN").expect("set $PARQUET_COLUMN"),
+		// store data in a vec 
+		&mut uncompressed_i64);
 	
 	// println!("Obtained data: {:?}", uncompressed_i64);
 
@@ -100,7 +104,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 
 	let mut alg_name = "";
 
-	alg_name = "Q";
+	alg_name = "Q-compression";
 	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
     group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
 		let orig = &uncompressed_i64;
@@ -123,7 +127,7 @@ fn compare_compress_i64(c: &mut Criterion) {
     });
 
 	// various LZ4 implementtions
-	alg_name = "LZ4";
+	alg_name = "LZ4_compression";
 	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
     group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
 		let orig = &uncompressed_u8;
