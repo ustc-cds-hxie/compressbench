@@ -16,8 +16,7 @@ BENCH_RESULTS="$BASE/benchresults"
 egrep '(^compression\b|\btime:|\bbytes\b|^Benchmarking\b)' "$BENCH_RESULTS/benches.txt" | grep -v '^uncompressed:' | grep -v '(p = ' | sed 's/^Benchmarking\b.*//' | sed '/^compression\b/{N;N;s/\n/ /g}' | grep -v '^$' | awk '{print $1","$5" "$6","$11}' >"$BENCH_RESULTS/benches.csv"
 
 # Uncompressed file size
-USZ=`grep '^uncompressed:' "$BENCH_RESULTS/benches.txt" | cut -d\  -f2`
-
+USZ=`grep '^uncompressed_u8:' "$BENCH_RESULTS/benches.txt" | cut -d\  -f4`
 (
 echo "bench,time,size,compression_ratio,ns,time_ratio,quality"
 while read L
@@ -28,7 +27,7 @@ do
   # Compute compression ratio
 	C=0
 	SZ=`echo $L | cut -f3 -d,`
-	[ -n "$SZ" ] && C=`echo -e "scale=3\n$SZ/$USZ" | bc -l`
+	[ -n "$SZ" ] && C=`echo -e "scale=3\n$USZ/$SZ" | bc -l`
 
   # Compute (adjusted) time ratio
 	MAX_TIME=$MAX_COMPRESSION_TIME
