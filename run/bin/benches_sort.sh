@@ -13,7 +13,7 @@ BASE=`dirname $0`/..
 BENCH_RESULTS="$BASE/benchresults"
 
 # Filter/organize fields: bench,time,size
-egrep '(^compression\b|\btime:|\bbytes\b|^Benchmarking\b)' "$BENCH_RESULTS/benches.txt" | grep -v '^uncompressed:' | grep -v '(p = ' | sed 's/^Benchmarking\b.*//' | sed '/^compression\b/{N;N;s/\n/ /g}' | grep -v '^$' | awk '{print $1","$5" "$6","$10}' >"$BENCH_RESULTS/benches.csv"
+egrep '(^compression\b|\btime:|\bbytes\b|^Benchmarking\b)' "$BENCH_RESULTS/benches.txt" | grep -v '^uncompressed:' | grep -v '(p = ' | sed 's/^Benchmarking\b.*//' | sed '/^compression\b/{N;N;s/\n/ /g}' | grep -v '^$' | awk '{print $1","$5" "$6","$11}' >"$BENCH_RESULTS/benches.csv"
 
 # Uncompressed file size
 USZ=`grep '^uncompressed:' "$BENCH_RESULTS/benches.txt" | cut -d\  -f2`
@@ -46,11 +46,11 @@ do
 	echo "$L,$C,$NS,$T,$Q"
 done <"$BENCH_RESULTS/benches.csv" | sort -t, -nrk7
 ) >"$BENCH_RESULTS/benches-2.csv"
-mv "$BENCH_RESULTS/benches-2.csv" "$BENCH_RESULTS/benches.csv"
+# mv "$BENCH_RESULTS/benches-2.csv" "$BENCH_RESULTS/benches.csv"
 
 # Pack and unpack
-egrep '(^bench,|\/unpack)' "$BENCH_RESULTS/benches.csv" >"$BENCH_RESULTS/benches-unpack.csv"
-egrep '(^bench,|\/pack)' "$BENCH_RESULTS/benches.csv" >"$BENCH_RESULTS/benches-pack.csv"
+egrep '(^bench,|\/unpack)' "$BENCH_RESULTS/benches-2.csv" >"$BENCH_RESULTS/benches-unpack.csv"
+egrep '(^bench,|\/pack)' "$BENCH_RESULTS/benches-2.csv" >"$BENCH_RESULTS/benches-pack.csv"
 
 # Total (pack+unpack)
 (
