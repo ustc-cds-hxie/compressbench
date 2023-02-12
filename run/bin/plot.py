@@ -66,6 +66,8 @@ for x,y,label in zip(compression_ratio, compression_time, compression_name):
     ax.plot(x, y, 'o', label=label.split('/')[1])
 
 plt.legend()
-# plt.legend(bbox_to_anchor=(1,1.05,1,0.5), loc='upper left')
+# plt.legend(bbox_to_anchor=(0,-0.5,1,0.5), loc='upper left')
+ax.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01, 1, 1), ncol=3,
+            borderaxespad=0, frameon=False)
 
-plt.savefig('pack.png')
+plt.savefig('pack.png', bbox_inches='tight')

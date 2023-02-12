@@ -673,7 +673,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
 
 			// run normal compressors
-			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
 
 			group.finish();
 		},
@@ -714,7 +714,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
 
 			// run normal compressors
-			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
 
 			group.finish();
 		},
@@ -761,7 +761,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
 
 			// run normal compressors
-			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
 
 			group.finish();
 		},
@@ -802,7 +802,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
 
 			// run normal compressors
-			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
 
 			group.finish();
 		},
@@ -847,7 +847,7 @@ fn compare_compress_i64(c: &mut Criterion) {
 			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
 
 			// run normal compressors
-			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
 
 			group.finish();
 		},
