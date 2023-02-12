@@ -1,4 +1,4 @@
-use criterion::{Criterion, black_box, criterion_group, criterion_main, PlotConfiguration, AxisScale, Throughput, BenchmarkId};
+use criterion::{Criterion, black_box, criterion_group, criterion_main, PlotConfiguration, AxisScale, Throughput, BenchmarkId, BenchmarkGroup, measurement::WallTime};
 use std::io::{Cursor, Read, Write};
 
 extern crate parquet;
@@ -8,10 +8,10 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-use q_compress::{auto_compress, auto_decompress, DEFAULT_COMPRESSION_LEVEL};
+use q_compress::{auto_compress, auto_decompress, data_types::NumberLike, DEFAULT_COMPRESSION_LEVEL};
 use byteorder::{ByteOrder, BigEndian};
 
-fn extract_column_data_from_parquet(input: &str, column: &str, output: &mut Vec<i64>) {
+fn extract_column_data_from_parquet(input: &str, column: &str, output: &mut Vec<parquet::record::Field>) -> parquet::basic::Type {
 
 	println!("input {:?}, column {:?}", input, column);
 
@@ -24,10 +24,23 @@ fn extract_column_data_from_parquet(input: &str, column: &str, output: &mut Vec<
 	
 	// Writing the type signature here, to be super 
 	// clear about the return type of get_fields()
-	let _fields:&[Arc<parquet::schema::types::Type>] = parquet_metadata
+	let fields:&[Arc<parquet::schema::types::Type>] = parquet_metadata
 		.file_metadata()
 		.schema()
 		.get_fields(); 
+	
+	let mut p_type = parquet::basic::Type::INT64;
+	let mut column_found = false;
+
+	// find data type of the requested column
+	for (_pos, col) in fields.iter().enumerate() {	       
+		if col.name() == column {
+			p_type = col.get_physical_type();
+			column_found = true;
+			break;
+		}		
+	} // for each column
+	assert_eq!(column_found, true);
 
 	let mut row_iter = reader.get_row_iter(None).unwrap();
 
@@ -40,77 +53,34 @@ fn extract_column_data_from_parquet(input: &str, column: &str, output: &mut Vec<
 		while let Some(x) = column_iter.next() {
 			if columns.contains(x.0) {
 				// println!("{:?}", x);
-				match x.1 {
-					parquet::record::Field::TimestampMicros(v) => output.push(*v),
-					parquet::record::Field::TimestampMillis(v) => output.push(*v),
-					parquet::record::Field::Long(v) => output.push(*v),
-					_ => {},
-				}
+				output.push(x.1.to_owned());
+				// match x.1 {
+				// 	parquet::record::Field::TimestampMicros(v) => output.push(*v),
+				// 	parquet::record::Field::TimestampMillis(v) => output.push(*v),
+				// 	parquet::record::Field::Long(v) => output.push(*v),
+				// 	_ => {},
+				// }
 			}
 		}
 	}
+	p_type
 }
 
-fn compare_compress_i64(c: &mut Criterion) {
-	// two benchmark groups
-    let mut group = c.benchmark_group("compression");
-
-	// plot config
-	let plot_config_compress = PlotConfiguration::default().summary_scale(AxisScale::Logarithmic);
-
-    group.plot_config(plot_config_compress);
-
-	// prepare raw data, load into memory
-
-	// let uncompressed_u8 = std::fs::read(
-	// 	std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS")
-	// ).expect("reading $FILE_TO_COMPRESS");
-
-	// // q-compress
-	// let i64_len = uncompressed_u8 / std::mem::size_of::<i64>();
-	// let mut numbers_got: Vec<i64> = Vec::with_capacity(i64_len);
-    // numbers_got.resize(i64_len, 0i64);
-
-	// BigEndian::read_i64_into(&uncompressed_u8, &mut numbers_got);
-
-	let mut uncompressed_i64: Vec<i64> = Vec::new();
-
-	extract_column_data_from_parquet(
-		// parquet file
-		&std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS"), 
-		// column in parquet
-		&std::env::var("PARQUET_COLUMN").expect("set $PARQUET_COLUMN"),
-		// store data in a vec 
-		&mut uncompressed_i64);
-	
-	// println!("Obtained data: {:?}", uncompressed_i64);
-
-	let orig_i64_len = uncompressed_i64.len();
-	let orig_u8_len = orig_i64_len * std::mem::size_of::<i64>();
-
-	println!("uncompressed_i64: {} items {} u8int", orig_i64_len, orig_u8_len);
-
-	let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
-	uncompressed_u8.resize(orig_u8_len, 0u8);
-	BigEndian::write_i64_into(&uncompressed_i64, &mut uncompressed_u8);
-
-	println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
-		uncompressed_u8.len() * std::mem::size_of::<u8>());
+fn benchmark_qcompress<T: NumberLike>(group: &mut BenchmarkGroup<WallTime>, uncompressed_orig: &Vec<T>, uncompressed_u8: &Vec<u8>, orig_u8_len: usize) {
 	
 	let mut compressed = Vec::with_capacity(orig_u8_len);
 
-	let mut unpacked_i64: Vec<i64> = Vec::with_capacity(orig_i64_len);
-	let mut unpacked_u8: Vec<u8> = Vec::with_capacity(orig_u8_len);
+	let mut unpacked_i64: Vec<T> = Vec::with_capacity(uncompressed_orig.len());
 
-	let mut alg_name = "";
+	let alg_name = "Q-compression";
 
-	alg_name = "Q-compression";
 	group.throughput(Throughput::Elements(uncompressed_u8.len() as u64));
     group.bench_function(BenchmarkId::new("pack", alg_name), |b| {
-		let orig = &uncompressed_i64;
+		let orig = uncompressed_orig;
         b.iter(|| {
             black_box(&mut compressed).clear();
 			compressed = auto_compress(black_box(orig), DEFAULT_COMPRESSION_LEVEL)
+			// compressed = auto_compress(black_box(uncompressed_orig), DEFAULT_COMPRESSION_LEVEL)
         })
     });
     println!("{}: {} {} bytes compression_ratio {:.2}",
@@ -122,9 +92,17 @@ fn compare_compress_i64(c: &mut Criterion) {
     group.bench_function(BenchmarkId::new("unpack", alg_name), |b| {
         b.iter(|| {
             black_box(&mut unpacked_i64).clear();
-			unpacked_i64 = auto_decompress::<i64>(black_box(&compressed)).expect("failed to decompress")
+			unpacked_i64 = auto_decompress::<T>(black_box(&compressed)).expect("failed to decompress")
         })
     });
+}
+
+fn benchmark_normal_compression(group: &mut BenchmarkGroup<WallTime>, uncompressed_u8: &Vec<u8>, orig_u8_len: usize) {
+	let mut compressed = Vec::with_capacity(orig_u8_len);
+
+	let mut unpacked_u8: Vec<u8> = Vec::with_capacity(orig_u8_len);
+
+	let mut alg_name = "";
 
 	// various LZ4 implementtions
 	alg_name = "LZ4_compression";
@@ -608,7 +586,317 @@ fn compare_compress_i64(c: &mut Criterion) {
 		})
 	});
 
-	group.finish();
+	
+}
+
+fn compare_compress_i64(c: &mut Criterion) {
+	// two benchmark groups
+    let mut group = c.benchmark_group("compression");
+
+	// plot config
+	let plot_config_compress = PlotConfiguration::default()
+													.summary_scale(AxisScale::Logarithmic);
+
+    group.plot_config(plot_config_compress);
+
+	// prepare raw data, load into memory
+
+	// let uncompressed_u8 = std::fs::read(
+	// 	std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS")
+	// ).expect("reading $FILE_TO_COMPRESS");
+
+	// // q-compress
+	// let i64_len = uncompressed_u8 / std::mem::size_of::<i64>();
+	// let mut numbers_got: Vec<i64> = Vec::with_capacity(i64_len);
+    // numbers_got.resize(i64_len, 0i64);
+
+	// BigEndian::read_i64_into(&uncompressed_u8, &mut numbers_got);
+
+	let mut uncompressed_field: Vec<parquet::record::Field> = Vec::new();
+
+	let element_type = extract_column_data_from_parquet(
+		// parquet file
+		&std::env::var("FILE_TO_COMPRESS").expect("set $FILE_TO_COMPRESS"), 
+		// column in parquet
+		&std::env::var("PARQUET_COLUMN").expect("set $PARQUET_COLUMN"),
+		// store data in a vec 
+		&mut uncompressed_field);
+	
+	assert!(uncompressed_field.len() >= 1);
+
+	let first_element = &uncompressed_field[0];
+
+	println!("data type: {:?}", first_element);
+
+	match first_element {
+		parquet::record::Field::TimestampMicros(_)
+		| parquet::record::Field::TimestampMillis(_) 
+		| parquet::record::Field::Long(_) 
+		| parquet::record::Field::ULong(_) => {
+			// i64
+
+			let mut uncompressed_orig = Vec::new();
+
+			// collect data
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::TimestampMicros(v)
+					| parquet::record::Field::TimestampMillis(v) 
+					| parquet::record::Field::Long(v) => {
+						uncompressed_orig.push(*v);
+					},
+					parquet::record::Field::ULong(v) => {
+						uncompressed_orig.push(*v as i64);
+					},
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_i64_len = uncompressed_orig.len();
+			let orig_u8_len = orig_i64_len * std::mem::size_of::<i64>();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_i64_len, orig_u8_len);
+
+			// convert to u8
+			let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+			uncompressed_u8.resize(orig_u8_len, 0u8);
+			BigEndian::write_i64_into(&uncompressed_orig[..], &mut uncompressed_u8);
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress
+			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+		},
+
+		parquet::record::Field::Double(_) => {
+			// i32, u32
+
+			let mut uncompressed_orig = Vec::new();
+
+			// collect data
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::Double(v) => {
+						uncompressed_orig.push(*v);
+					},
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_f64_len = uncompressed_orig.len();
+			let orig_u8_len = orig_f64_len * std::mem::size_of::<f64>();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_f64_len, orig_u8_len);
+
+			// convert to u8
+			let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+			uncompressed_u8.resize(orig_u8_len, 0u8);
+			BigEndian::write_f64_into(&uncompressed_orig[..], &mut uncompressed_u8);
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress
+			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+		},
+
+		parquet::record::Field::Int(_)
+		| parquet::record::Field::Date(_)
+		| parquet::record::Field::UInt(_)  => {
+			// i32, u32
+
+			let mut uncompressed_orig = Vec::new();
+
+			// collect data
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::Int(v)
+					| parquet::record::Field::Date(v) => {
+						uncompressed_orig.push(*v);
+					},
+					parquet::record::Field::UInt(v) => {
+						uncompressed_orig.push(*v as i32);
+					},
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_i32_len = uncompressed_orig.len();
+			let orig_u8_len = orig_i32_len * std::mem::size_of::<i32>();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_i32_len, orig_u8_len);
+
+			// convert to u8
+			let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+			uncompressed_u8.resize(orig_u8_len, 0u8);
+			BigEndian::write_i32_into(&uncompressed_orig[..], &mut uncompressed_u8);
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress
+			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+		},
+
+		parquet::record::Field::Float(_) => {
+			// i32, u32
+
+			let mut uncompressed_orig = Vec::new();
+
+			// collect data
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::Float(v) => {
+						uncompressed_orig.push(*v);
+					},
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_f32_len = uncompressed_orig.len();
+			let orig_u8_len = orig_f32_len * std::mem::size_of::<f32>();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_f32_len, orig_u8_len);
+
+			// convert to u8
+			let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+			uncompressed_u8.resize(orig_u8_len, 0u8);
+			BigEndian::write_f32_into(&uncompressed_orig[..], &mut uncompressed_u8);
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress
+			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+		},
+
+		parquet::record::Field::Short(_)
+		| parquet::record::Field::UShort(_) => {
+			// i16, u16
+
+			let mut uncompressed_orig = Vec::new();
+
+			// collect data
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::Short(v) => {
+						uncompressed_orig.push(*v);
+					},
+					parquet::record::Field::UShort(v) => {
+						uncompressed_orig.push(*v as i16);
+					},
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_i16_len = uncompressed_orig.len();
+			let orig_u8_len = orig_i16_len * std::mem::size_of::<i16>();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_i16_len, orig_u8_len);
+
+			// convert to u8
+			let mut uncompressed_u8 : Vec<u8> = Vec::with_capacity(orig_u8_len);
+			uncompressed_u8.resize(orig_u8_len, 0u8);
+			BigEndian::write_i16_into(&uncompressed_orig[..], &mut uncompressed_u8);
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress
+			benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			// benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+		},
+
+		parquet::record::Field::Str(_)
+		| parquet::record::Field::Bytes(_) => {
+			let mut uncompressed_orig = Vec::new();
+			for i in 0 .. uncompressed_field.len()  {
+				let x = &uncompressed_field[i];
+				match x {
+					parquet::record::Field::Str(v) => {
+						uncompressed_orig.append(&mut v.as_bytes().to_vec());
+					},
+					parquet::record::Field::Bytes(v) => {
+						uncompressed_orig.append(&mut v.data().to_vec());
+					}
+					_ => {
+						panic!("Error: column type mismatch. i {} x {:?} element_type {:?}", i, x, element_type);
+					}
+				}
+			}
+
+			// set up data structures
+			let orig_u8_len = uncompressed_orig.len();
+
+			println!("uncompressed_orig: {} items {} u8int", orig_u8_len, orig_u8_len);
+
+			// convert to u8
+			let uncompressed_u8 = uncompressed_orig;
+			
+			println!("uncompressed_u8: {} items {} u8int", uncompressed_u8.len(), 
+				uncompressed_u8.len() * std::mem::size_of::<u8>());
+
+			// run q-compress : does not support Vec<u8> yet
+			// benchmark_qcompress(&mut group, &uncompressed_orig, &uncompressed_u8, orig_u8_len);
+
+			// run normal compressors
+			benchmark_normal_compression(&mut group, &uncompressed_u8, orig_u8_len);
+
+			group.finish();
+
+		},
+		
+		_ => {
+			panic!("Error: element_type {:?} has not been implemented yet", element_type);
+		},
+	}
+	
+	// println!("Obtained data: {:?}", uncompressed_orig);
 
 }
 
