@@ -23,21 +23,26 @@
 //! ```
 //!
 
-
 extern crate parquet;
 use parquet::file::reader::{FileReader, SerializedFileReader};
-use parquet::record::Row;
-use parquet::schema::types::Type;
 use parquet::basic::Type as PhysicalType;
+
+#[allow(unused_imports)]
+use parquet::record::Row;
+#[allow(unused_imports)]
+use parquet::schema::types::Type;
+
 
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
-use std::env;
-use std::process;
 use std::sync::Arc;
-
 use std::collections::HashMap;
+
+#[allow(unused_imports)]
+use std::env;
+#[allow(unused_imports)]
+use std::process;
 
 use clap::{Parser, Subcommand};
 
@@ -75,7 +80,7 @@ fn print_schema(
     
         let mut schema_hashmap = HashMap::new();
 	
-	for (pos, column) in fields.iter().enumerate() {
+	for (_pos, column) in fields.iter().enumerate() {
 		let name = column.name();		       
 		let p_type = column.get_physical_type();
 		let output_rust_type = match p_type {					
@@ -133,7 +138,7 @@ fn print_data(
 
 		println!("{}",result);
 
-        writeln!(output, "{}",result);
+        writeln!(output, "{}",result).unwrap();
         
 	}
 	
@@ -152,6 +157,7 @@ fn print_data(
 	// }
 }
 
+#[allow(dead_code)]
 fn format_row(
 		row : &parquet::record::Row, 
 		delimiter: &str,
