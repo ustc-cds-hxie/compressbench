@@ -37,6 +37,8 @@ use std::env;
 use std::process;
 use std::sync::Arc;
 
+use std::collections::HashMap;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -69,7 +71,9 @@ enum SubCommand {
 
 fn print_schema(
 		fields:&[Arc<parquet::schema::types::Type>]
-	){
+	) -> HashMap<&str, Vec<String>> {
+    
+        let mut schema_hashmap = HashMap::new();
 	
 	for (pos, column) in fields.iter().enumerate() {
 		let name = column.name();		       
@@ -85,8 +89,12 @@ fn print_schema(
 				"Cannot convert  this parquet file, unhandled data type for column {}", 
 				name),									
 		};
-		println!("{} {} {}",pos, name, output_rust_type);			
-	} // for each column	
+        let mut vec_type = Vec::new();
+        vec_type.push(output_rust_type.to_string());
+        schema_hashmap.insert(name, vec_type);
+		// println!("{} {} {}",pos, name, output_rust_type);			
+	} // for each column
+    schema_hashmap	
 }
 
 
@@ -157,6 +165,32 @@ fn format_row(
 		.join(delimiter)
 }
 
+// copy from parquet::record::Field, since get_type_name() is a private function in parquet
+fn get_type_name(field:&parquet::record::Field) -> &'static str {
+    match *field {
+        parquet::record::Field::Null => "Null",
+        parquet::record::Field::Bool(_) => "Bool",
+        parquet::record::Field::Byte(_) => "Byte u8",
+        parquet::record::Field::Short(_) => "Short i16",
+        parquet::record::Field::Int(_) => "Int i32",
+        parquet::record::Field::Long(_) => "Long i64",
+        parquet::record::Field::UByte(_) => "UByte u8",
+        parquet::record::Field::UShort(_) => "UShort u16",
+        parquet::record::Field::UInt(_) => "UInt u32",
+        parquet::record::Field::ULong(_) => "ULong u64",
+        parquet::record::Field::Float(_) => "Float f32",
+        parquet::record::Field::Double(_) => "Double f64",
+        parquet::record::Field::Decimal(_) => "Decimal",
+        parquet::record::Field::Date(_) => "Date u64",
+        parquet::record::Field::Str(_) => "Str",
+        parquet::record::Field::Bytes(_) => "Bytes",
+        parquet::record::Field::TimestampMillis(_) => "TimestampMillis u64",
+        parquet::record::Field::TimestampMicros(_) => "TimestampMicros u64",
+        parquet::record::Field::Group(_) => "Group",
+        parquet::record::Field::ListInternal(_) => "ListInternal",
+        parquet::record::Field::MapInternal(_) => "MapInternal",
+    }
+}
 
 fn main(){
 
@@ -170,8 +204,40 @@ fn main(){
                                             .file_metadata()
                                             .schema()
                                             .get_fields();
-            print_schema(fields);
+
+            let mut schema_hashmap = print_schema(fields);
+
+            let mut row_iter = reader.get_row_iter(None).unwrap();
+
+            while let Some(record) = row_iter.next() {	
+                // println!("{:?}", record);
+                let mut column_iter = record.get_column_iter();
+                while let Some(x) = column_iter.next() {
+                    let key = x.0;
+                    if schema_hashmap.contains_key(key.as_str()) {
+                        schema_hashmap.get_mut(key.as_str()).unwrap().push(get_type_name(x.1).to_string());
+                    }
+                    // println!("{:?}", x);
+                }
+                break;
+            }
+
+            for _ in 0..(20+15+15+2*3+4) { print!("_"); }
+            println!("");
+
+            println!("| {:<20} | {:<15} | {:<15} |", "Column Name", "Physical Type", "Data Type");
+            for _ in 0..(20+15+15+2*3+4) { print!("-"); }
+            println!("");
+
+            for (k, v) in schema_hashmap.iter() {
+                print!("| {:<20} ", k);
+                for x in v.iter() {
+                    print!("| {:<15} ", x);
+                }
+                println!("|");
+            }
         },
+
         SubCommand::Export {
             input,
             output,
